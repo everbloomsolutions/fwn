@@ -87,7 +87,7 @@ export function Navbar() {
   );
 
   const mobileCategoryLinks = categories.map((c) => ({
-    href: `/categories/${c.slug}`,
+    href: `/shop?category=${c.slug}`,
     label: c.name,
   }));
 
@@ -139,7 +139,7 @@ export function Navbar() {
                             {categories.map((c) => (
                               <Link
                                 key={c._id}
-                                href={`/categories/${c.slug}`}
+                                href={`/shop?category=${c.slug}`}
                                 className="block rounded-lg px-3 py-2 text-sm text-text-muted hover:bg-surface-hover hover:text-text"
                               >
                                 {c.name}

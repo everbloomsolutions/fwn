@@ -65,7 +65,7 @@ export function CategoryHighlights() {
           {categories.map((category) => (
             <Link
               key={category._id}
-              href={`/categories/${category.slug}`}
+              href={`/shop?category=${category.slug}`}
               className="group relative overflow-hidden rounded-2xl border border-border bg-surface transition hover:shadow-lg"
             >
               <div className="relative aspect-[3/2] w-full overflow-hidden">

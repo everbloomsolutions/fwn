@@ -44,7 +44,6 @@ export function SuggestedProducts({
   excludeIds = [],
   limit = 4,
 }: SuggestedProductsProps) {
-  const params = useParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
 
