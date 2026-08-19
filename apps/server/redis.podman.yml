@@ -14,7 +14,7 @@ spec:
       image: docker.io/library/redis:7-alpine
       ports:
         - containerPort: 6379
-          hostPort: 6379
+          hostPort: 6380
           protocol: TCP
       volumeMounts:
         - name: redis-data
