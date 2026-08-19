@@ -1,0 +1,13 @@
+# Root Docker Compose for development
+# Starts shared data services (Redis + MongoDB).
+# Run the backend and frontend locally with pnpm dev.
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yaml up -d
+#   pnpm dev:backend
+#   pnpm dev:frontend
+
+name: fwn
+
+include:
+  - apps/server/docker-compose.dev.yaml

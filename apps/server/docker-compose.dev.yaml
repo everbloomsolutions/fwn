@@ -1,17 +1,16 @@
-version: '3.8'
-
 # Docker Compose configuration for Development
+name: fwn
 # Usage: docker-compose -f docker-compose.dev.yaml up -d
 # Or: podman-compose -f docker-compose.dev.yaml up -d
 
 services:
   redis:
     image: docker.io/library/redis:7-alpine
-    container_name: server-redis
+    container_name: fwn-redis
     ports:
       - "6379:6379"
     volumes:
-      - server-redis-data:/data
+      - fwn-redis-data:/data
     command: redis-server --appendonly yes
     restart: unless-stopped
     healthcheck:
@@ -21,27 +20,35 @@ services:
       retries: 3
       start_period: 5s
     networks:
-      - server-network
+      - fwn-network
 
-  # Optional: MongoDB service (if not using external MongoDB)
+  # MongoDB service for development
   mongo:
     image: mongo:7
-    container_name: server-mongo
+    container_name: fwn-mongo
     ports:
       - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: fwn
     volumes:
-      - server-mongo-data:/data/db
+      - fwn-mongo-data:/data/db
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
-      - server-network
+      - fwn-network
 
 volumes:
-  server-redis-data:
+  fwn-redis-data:
     driver: local
-  server-mongo-data:
+  fwn-mongo-data:
     driver: local
 
 networks:
-  server-network:
+  fwn-network:
     driver: bridge
 

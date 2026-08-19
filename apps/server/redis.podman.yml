@@ -4,7 +4,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: server-redis-pod
+  name: fwn-redis-pod
   labels:
     app: server
     component: redis
@@ -51,14 +51,14 @@ spec:
   volumes:
     - name: redis-data
       type: volume
-      source: server-redis-data
+      source: fwn-redis-data
 
 ---
 # Persistent Volume for Redis data
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: server-redis-data
+  name: fwn-redis-data
 spec:
   accessModes:
     - ReadWriteOnce
