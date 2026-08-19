@@ -12,9 +12,9 @@ import { logger } from '@/shared/utils/logger';
 import { motion } from 'framer-motion';
 import { brandConfig } from '@/shared/brand';
 
-// Office location coordinates (Koramangala, Bangalore)
-const OFFICE_COORDINATES: [number, number] = [77.6245, 12.9352]; // [longitude, latitude]
-const OFFICE_ADDRESS = 'Foodworld Naturals, 24th Main Road, Koramangala, Bangalore, Karnataka - 560034';
+// Office location coordinates (Madeenaguda, Hyderabad)
+const OFFICE_COORDINATES: [number, number] = [78.373, 17.495]; // [longitude, latitude]
+const OFFICE_ADDRESS = '202, Grecious Homes, Lane Number 1, Mythri Nagar, Madeenaguda, Hyderabad 500049';
 
 export default function ContactPage() {
   const searchParams = useSearchParams();
@@ -201,9 +201,11 @@ export default function ContactPage() {
                   <div className="ml-4 flex-1">
                     <p className="text-sm font-semibold text-text mb-2">Address</p>
                     <p className="text-sm text-text-muted leading-relaxed">
-                      24th Main Road, Koramangala
+                      202, Grecious Homes, Lane Number 1
                       <br />
-                      Bangalore, Karnataka - 560034
+                      Mythri Nagar, Madeenaguda
+                      <br />
+                      Hyderabad 500049
                     </p>
                   </div>
                 </motion.div>
@@ -269,7 +271,7 @@ export default function ContactPage() {
               Find Us
             </Heading>
             <Text className="mx-auto max-w-2xl text-lg text-text-muted">
-              Visit our office in Bangalore. We&apos;re located in the heart of Koramangala, easily accessible and ready to serve you.
+              Visit our office in Hyderabad. We&apos;re located in Madeenaguda, easily accessible and ready to serve you.
             </Text>
           </motion.div>
 

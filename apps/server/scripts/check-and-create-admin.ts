@@ -20,7 +20,7 @@ dotenv.config({ path: altRootEnvPath });
 dotenv.config({ path: backendEnvPath });
 
 const ADMIN_EMAIL = 'admin@foodworldnaturals.com';
-const ADMIN_PASSWORD = 'Admin@123'; // Default password
+const ADMIN_PASSWORD = 'Vinayaka@123'; // Default password
 const ADMIN_NAME = 'Admin User';
 
 async function checkAndCreateAdmin() {

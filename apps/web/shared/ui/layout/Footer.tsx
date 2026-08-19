@@ -174,9 +174,9 @@ export function Footer() {
                 <div className="text-sm text-text-muted flex items-start gap-2">
                   <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
                   <span>
-                    Flat No. 502, Sonnet Residency,<br />
-                    Mayuri Nagar, Miyapur,<br />
-                    Hyderabad, Telangana - 500049
+                    202, Grecious Homes, Lane Number 1,<br />
+                    Mythri Nagar, Madeenaguda,<br />
+                    Hyderabad 500049
                   </span>
                 </div>
               </li>

@@ -44,10 +44,13 @@ export const toUserResponse = (user: IUser | Record<string, unknown>): IUserResp
   const obj = 'toObject' in user && typeof user.toObject === 'function'
     ? user.toObject()
     : user;
+  const userObj = obj as Record<string, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _password, ...userWithoutPassword } = obj as Record<string, unknown>;
-  return userWithoutPassword as unknown as IUserResponse;
+  const { password: _password, ...userWithoutPassword } = userObj;
+  return {
+    ...userWithoutPassword,
+    _id: userObj._id?.toString() || '',
+  } as unknown as IUserResponse;
 };
 
 const userSchema = new Schema<IUser>(

@@ -37,6 +37,9 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Downloaded product images
+apps/web/public/images/products/
+
 # Prisma
 prisma/migrations/
 
