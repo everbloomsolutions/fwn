@@ -11,4 +11,4 @@ export const TRUST_BADGES = [
   'Sustainable',
 ] as const;
 
-export const PRODUCT_UNITS = ['500g', '1kg', '2kg'] as const;
+export const VARIANT_OPTIONS = ['200g', '500g', '1kg', '200ml', '500ml', '1ltr', '1pcs', '2pcs', '3pcs'] as const;

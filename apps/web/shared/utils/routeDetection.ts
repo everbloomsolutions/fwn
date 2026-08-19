@@ -3,7 +3,7 @@
  * Shared logic for determining route context
  */
 
-import { ROUTE_PATTERNS, USER_ROUTES, AUTH_ROUTES } from '@/shared/config/routes';
+import { ROUTE_PATTERNS } from '@/shared/config/routes';
 
 /**
  * Check if current pathname is in the authenticated user area

@@ -17,6 +17,8 @@ import { Leaf, Heart, ShieldCheck, Sprout } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PUBLIC_ROUTES } from '@/shared/config/routes';
 import { brandConfig } from '@/shared/brand';
+import { CategoryHighlights } from '@/modules/shop/components/CategoryHighlights';
+import { SuggestedProducts } from '@/modules/shop/components/SuggestedProducts';
 
 export default function HomePage() {
   const stats = [
@@ -32,7 +34,7 @@ export default function HomePage() {
         description="Authentic, natural, and wholesome food products sourced responsibly from farms and trusted producers across India."
         primaryAction={{
           label: 'Shop Now',
-          href: PUBLIC_ROUTES.SERVICES,
+          href: PUBLIC_ROUTES.SHOP,
         }}
         secondaryAction={{
           label: 'About Us',
@@ -167,12 +169,19 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="bg-surface py-8 sm:py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <CategoryHighlights />
+          <SuggestedProducts title="Best Sellers" limit={4} />
+        </div>
+      </section>
+
       <CTASection
         title="Ready to Eat Healthier?"
         description={`Explore ${brandConfig.name} today for natural and wholesome food products.`}
         primaryAction={{
           label: 'Shop Now',
-          href: PUBLIC_ROUTES.SERVICES,
+          href: PUBLIC_ROUTES.SHOP,
         }}
         secondaryAction={{
           label: 'Contact Us',

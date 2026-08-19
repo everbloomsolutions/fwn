@@ -9,6 +9,7 @@ import { PUBLIC_ROUTES } from '@/shared/config/routes';
 import { Container, Heading, Text, Card, CardContent, BackToTop } from '@/shared/ui';
 import { useToast } from '@/shared/ui';
 import { useCartStore } from '@/modules/shop/stores/cartStore';
+import { SuggestedProducts } from '@/modules/shop/components/SuggestedProducts';
 import { TRUST_BADGES } from '@/shared/config/shop';
 import { Minus, Plus, ShoppingCart, ArrowLeft, Star, Check, Zap } from 'lucide-react';
 import Link from 'next/link';
@@ -36,7 +37,7 @@ interface Product {
   nutrition?: Record<string, string>;
   rating?: number;
   reviewCount?: number;
-  category: { name: string };
+  category: { _id: string; name: string; slug: string };
   variants: ProductVariant[];
 }
 
@@ -65,8 +66,8 @@ export default function ProductDetailPage() {
         });
         const prod = response.data;
         setProduct(prod);
-        const first = prod.variants.find((v) => v.isActive !== false) || prod.variants[0];
-        setSelectedUnit(first?.unit || prod.unit);
+        const active = prod.variants.filter((v) => v.isActive !== false);
+        setSelectedUnit(active[0]?.unit || prod.variants[0]?.unit);
       } catch (err) {
         showError('Failed to load product', err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -93,10 +94,15 @@ export default function ProductDetailPage() {
   }
 
   const variant = product.variants.find((v) => v.unit === selectedUnit) || product.variants[0];
+  const hasStock = (variant?.stock || 0) > 0;
 
   const handleAddToCart = async () => {
-    if (!variant || variant.stock < quantity) {
+    if (!variant || !hasStock) {
       showError('Out of stock', `Only ${variant?.stock || 0} units available`);
+      return;
+    }
+    if (variant.stock < quantity) {
+      showError('Not enough stock', `Only ${variant.stock} units available for ${variant.unit}`);
       return;
     }
     try {
@@ -108,8 +114,12 @@ export default function ProductDetailPage() {
   };
 
   const handleBuyNow = async () => {
-    if (!variant || variant.stock < quantity) {
+    if (!variant || !hasStock) {
       showError('Out of stock', `Only ${variant?.stock || 0} units available`);
+      return;
+    }
+    if (variant.stock < quantity) {
+      showError('Not enough stock', `Only ${variant.stock} units available for ${variant.unit}`);
       return;
     }
     try {
@@ -121,7 +131,17 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <Container maxWidth="xl" className="py-8 sm:py-12 lg:py-16">
+    <Container maxWidth="xl" className="py-6 sm:py-12 lg:py-16">
+      <nav className="mb-4 flex flex-wrap gap-1 text-sm text-text-muted" aria-label="Breadcrumb">
+        <Link href={PUBLIC_ROUTES.HOME} className="hover:text-primary">Home</Link>
+        <span className="text-border">/</span>
+        <Link href={PUBLIC_ROUTES.SHOP} className="hover:text-primary">Shop</Link>
+        <span className="text-border">/</span>
+        <Link href={`/shop?category=${product.category.slug}`} className="hover:text-primary">{product.category.name}</Link>
+        <span className="text-border">/</span>
+        <span className="line-clamp-1 max-w-[200px] text-text">{product.name}</span>
+      </nav>
+
       <Link
         href={PUBLIC_ROUTES.SHOP}
         className="mb-6 inline-flex items-center gap-2 text-sm text-primary hover:text-primary-hover"
@@ -130,8 +150,8 @@ export default function ProductDetailPage() {
         Back to shop
       </Link>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-bg-muted">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-bg-muted">
           <Image
             src={product.images[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=800&fit=crop'}
             alt={product.name}
@@ -142,9 +162,9 @@ export default function ProductDetailPage() {
           />
         </div>
 
-        <div>
+        <div className="flex flex-col">
           <Text className="text-sm text-text-muted uppercase tracking-wide">{product.category.name}</Text>
-          <Heading level="h1" className="mb-2 mt-2">
+          <Heading level="h1" balance className="mb-2 mt-2 text-2xl sm:text-3xl">
             {product.name}
           </Heading>
 
@@ -172,11 +192,14 @@ export default function ProductDetailPage() {
                     setSelectedUnit(v.unit);
                     setQuantity(1);
                   }}
+                  disabled={v.stock <= 0}
                   className={cn(
                     'rounded-full border px-4 py-1.5 text-sm font-medium transition',
                     v.unit === selectedUnit
                       ? 'border-primary bg-primary text-white'
-                      : 'border-border bg-surface text-text hover:border-primary'
+                      : v.stock > 0
+                      ? 'border-border bg-surface text-text hover:border-primary'
+                      : 'cursor-not-allowed border-border bg-bg text-text-muted opacity-50'
                   )}
                 >
                   {v.unit} - ₹{v.price}
@@ -184,9 +207,11 @@ export default function ProductDetailPage() {
               ))}
           </div>
 
-          <Text className="mt-6 leading-relaxed text-text-muted">{product.description}</Text>
+          <Text className="mt-4 line-clamp-4 text-sm leading-relaxed text-text-muted sm:text-base sm:leading-relaxed">
+            {product.description}
+          </Text>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             {TRUST_BADGES.map((badge) => (
               <span
                 key={badge}
@@ -199,8 +224,8 @@ export default function ProductDetailPage() {
           </div>
 
           {product.ingredients && product.ingredients.length > 0 && (
-            <div className="mt-6">
-              <Heading level="h3" className="mb-2 text-base">
+            <div className="mt-4 sm:mt-6">
+              <Heading level="h3" className="mb-1 text-base">
                 Ingredients
               </Heading>
               <Text className="text-text-muted">{product.ingredients.join(', ')}</Text>
@@ -208,7 +233,7 @@ export default function ProductDetailPage() {
           )}
 
           {product.nutrition && Object.keys(product.nutrition).length > 0 && (
-            <Card className="mt-6">
+            <Card className="mt-4 sm:mt-6">
               <CardContent>
                 <Heading level="h3" className="mb-3 text-base">
                   Nutrition Info
@@ -225,7 +250,7 @@ export default function ProductDetailPage() {
             </Card>
           )}
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div className="mt-6 flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center rounded-lg border border-border bg-surface">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -246,15 +271,17 @@ export default function ProductDetailPage() {
 
             <button
               onClick={handleAddToCart}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-white hover:bg-primary-hover"
+              disabled={!hasStock}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-white hover:bg-primary-hover disabled:opacity-50 sm:flex-none"
             >
               <ShoppingCart className="h-5 w-5" />
-              Add to Cart
+              {hasStock ? 'Add to Cart' : 'Out of Stock'}
             </button>
 
             <button
               onClick={handleBuyNow}
-              className="inline-flex items-center gap-2 rounded-lg border border-primary px-6 py-3 font-medium text-primary hover:bg-primary/5"
+              disabled={!hasStock}
+              className="inline-flex w-full flex-1 items-center justify-center gap-2 rounded-lg border border-primary px-6 py-3 font-medium text-primary hover:bg-primary/5 disabled:opacity-50 sm:w-auto sm:flex-none"
             >
               <Zap className="h-5 w-5" />
               Buy Now
@@ -262,6 +289,14 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      <SuggestedProducts
+        title="You may also like"
+        categoryId={product.category._id}
+        excludeIds={[product._id]}
+        limit={4}
+      />
+
       <BackToTop />
     </Container>
   );

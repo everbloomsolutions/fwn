@@ -31,15 +31,21 @@ export interface ProductCardProps {
 export function ProductCard({ product }: { product: ProductCardProps }) {
   const { success, error: showError } = useToast();
   const addItem = useCartStore((state) => state.addItem);
-  const [selectedUnit, setSelectedUnit] = useState<string>(product.variants.find((v) => v.isActive !== false)?.unit || product.variants[0]?.unit);
+  const activeVariants = product.variants.filter((v) => v.isActive !== false);
+  const [selectedUnit, setSelectedUnit] = useState<string>(activeVariants[0]?.unit || product.variants[0]?.unit);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
   const variant = product.variants.find((v) => v.unit === selectedUnit) || product.variants[0];
+  const hasStock = (variant?.stock || 0) > 0;
 
   const handleAdd = async () => {
-    if (!variant || variant.stock < quantity) {
+    if (!variant || !hasStock) {
       showError('Out of stock', `Only ${variant?.stock || 0} units available`);
+      return;
+    }
+    if (variant.stock < quantity) {
+      showError('Not enough stock', `Only ${variant.stock} units available for ${variant.unit}`);
       return;
     }
     try {
@@ -52,9 +58,9 @@ export function ProductCard({ product }: { product: ProductCardProps }) {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border bg-surface p-3 transition-all hover:shadow-lg hover:-translate-y-1">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-surface p-3 transition-all hover:shadow-lg hover:-translate-y-1">
       <Link href={PUBLIC_ROUTES.PRODUCT(product.slug)} className="block">
-        <div className="relative h-48 w-full overflow-hidden rounded-xl bg-bg-muted">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-bg-muted">
           <Image
             src={product.images[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=600&fit=crop'}
             alt={product.name}
@@ -72,6 +78,11 @@ export function ProductCard({ product }: { product: ProductCardProps }) {
           >
             <Heart className="h-4 w-4" />
           </button>
+          {!hasStock && (
+            <span className="absolute left-2 top-2 rounded-full bg-error/90 px-2 py-1 text-[10px] font-medium text-white">
+              Out of stock
+            </span>
+          )}
         </div>
       </Link>
 
@@ -88,35 +99,38 @@ export function ProductCard({ product }: { product: ProductCardProps }) {
       </div>
 
       <Link href={PUBLIC_ROUTES.PRODUCT(product.slug)} className="mt-1 block">
-        <h3 className="text-base font-semibold leading-tight text-text hover:text-primary">{product.name}</h3>
+        <h3 className="line-clamp-2 min-h-[2.5rem] text-base font-semibold leading-tight text-text hover:text-primary">
+          {product.name}
+        </h3>
       </Link>
 
       <div className="mt-2 text-lg font-bold text-primary">₹{variant?.price ?? product.price}</div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {product.variants
-          .filter((v) => v.isActive !== false)
-          .map((v) => (
-            <button
-              key={v.unit}
-              onClick={() => {
-                setSelectedUnit(v.unit);
-                setQuantity(1);
-                setAdded(false);
-              }}
-              className={cn(
-                'rounded-full border px-3 py-1 text-xs font-medium transition',
-                v.unit === selectedUnit
-                  ? 'border-primary bg-primary text-white'
-                  : 'border-border bg-surface text-text hover:border-primary'
-              )}
-            >
-              {v.unit}
-            </button>
-          ))}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {activeVariants.map((v) => (
+          <button
+            key={v.unit}
+            onClick={() => {
+              setSelectedUnit(v.unit);
+              setQuantity(1);
+              setAdded(false);
+            }}
+            disabled={v.stock <= 0}
+            className={cn(
+              'rounded-full border px-2.5 py-1 text-xs font-medium transition',
+              v.unit === selectedUnit
+                ? 'border-primary bg-primary text-white'
+                : v.stock > 0
+                ? 'border-border bg-surface text-text hover:border-primary'
+                : 'cursor-not-allowed border-border bg-bg text-text-muted opacity-50'
+            )}
+          >
+            {v.unit}
+          </button>
+        ))}
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-auto pt-3 flex items-center gap-2">
         {added ? (
           <div className="flex flex-1 items-center justify-between rounded-lg bg-success/10 px-3 py-2 text-sm font-medium text-success">
             <span className="flex items-center gap-1">
@@ -145,10 +159,11 @@ export function ProductCard({ product }: { product: ProductCardProps }) {
             </div>
             <button
               onClick={handleAdd}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+              disabled={!hasStock}
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50"
             >
               <ShoppingCart className="h-4 w-4" />
-              Add
+              {hasStock ? 'Add' : 'Out of stock'}
             </button>
           </>
         )}

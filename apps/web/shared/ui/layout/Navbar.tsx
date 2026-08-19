@@ -7,7 +7,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { useCartStore } from '@/modules/shop/stores/cartStore';
 import { MiniCart } from '@/modules/shop/components/MiniCart';
@@ -22,17 +22,43 @@ import { navbarNavigationLinks } from '@/shared/config/navigation';
 import { isAuthPage, isActiveRoute } from '@/shared/utils/routeDetection';
 import { Logo } from '@/shared/ui/brand';
 import { USER_ROUTES, AUTH_ROUTES, PUBLIC_ROUTES } from '@/shared/config/routes';
-import { ShoppingCart } from 'lucide-react';
+import { API_ENDPOINTS } from '@/shared/config/api';
+import { apiRequest } from '@/shared/core/http/apiClient';
+import { ShoppingCart, ChevronDown, Grid3X3 } from 'lucide-react';
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+}
 
 export function Navbar() {
   const { isAuthenticated } = useAuth();
   const pathname = usePathname();
   const totalItems = useCartStore((state) => state.totalItems);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const authPage = isAuthPage(pathname);
   const showNavigationLinks = !authPage;
   const logoHref = PUBLIC_ROUTES.HOME;
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const response = await apiRequest<{ data: Category[] }>({
+          method: 'GET',
+          url: API_ENDPOINTS.categories.LIST,
+        });
+        setCategories(response.data);
+      } catch {
+        // ignore
+      }
+    }
+    loadCategories();
+  }, []);
 
   const authLinks = isAuthenticated ? (
     <>
@@ -60,11 +86,16 @@ export function Navbar() {
     </>
   );
 
+  const mobileCategoryLinks = categories.map((c) => ({
+    href: `/categories/${c.slug}`,
+    label: c.name,
+  }));
+
   return (
     <>
       <header className="border-b border-border bg-surface/95 backdrop-blur-md sticky top-0 z-40 shadow-sm">
         <Container maxWidth="xl">
-          <div className="flex h-16 items-center justify-between gap-4">
+          <div className="flex h-16 items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center min-w-0 flex-shrink-0">
               <Logo href={logoHref} size="md" variant="auto" />
             </div>
@@ -72,6 +103,54 @@ export function Navbar() {
             {showNavigationLinks && (
               <nav className="hidden md:flex flex-1 items-center justify-center gap-1" aria-label="Main navigation">
                 {navbarNavigationLinks.map((link) => {
+                  if (link.href === PUBLIC_ROUTES.SHOP) {
+                    return (
+                      <div
+                        key={link.href}
+                        className="relative"
+                        onMouseEnter={() => {
+                          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                          setCategoriesOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          timeoutRef.current = setTimeout(() => setCategoriesOpen(false), 150);
+                        }}
+                      >
+                        <button
+                          onClick={() => setCategoriesOpen((v) => !v)}
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-lg px-4 py-2 text-base font-medium transition',
+                            isActiveRoute(pathname, link.href)
+                              ? 'text-primary'
+                              : 'text-text-muted hover:text-text'
+                          )}
+                        >
+                          <span>Shop</span>
+                          <ChevronDown className={cn('h-4 w-4 transition', categoriesOpen && 'rotate-180')} />
+                        </button>
+                        {categoriesOpen && (
+                          <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-xl border border-border bg-surface p-2 shadow-xl">
+                            <Link
+                              href="/categories"
+                              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+                            >
+                              <Grid3X3 className="h-4 w-4" /> All Categories
+                            </Link>
+                            {categories.map((c) => (
+                              <Link
+                                key={c._id}
+                                href={`/categories/${c.slug}`}
+                                className="block rounded-lg px-3 py-2 text-sm text-text-muted hover:bg-surface-hover hover:text-text"
+                              >
+                                {c.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
                   const isActive = isActiveRoute(pathname, link.href);
                   return (
                     <Link
@@ -90,7 +169,7 @@ export function Navbar() {
               </nav>
             )}
 
-            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
               <div className="hidden md:flex items-center gap-2 sm:gap-4">
                 <ThemeToggle variant="icon" size="sm" />
                 {isAuthenticated ? (
@@ -126,7 +205,13 @@ export function Navbar() {
 
               <div className="md:hidden flex items-center gap-2">
                 <ThemeToggle variant="icon" size="sm" />
-                <MobileMenu links={navbarNavigationLinks} authLinks={authLinks} />
+                <MobileMenu
+                  links={[
+                    ...navbarNavigationLinks,
+                    ...mobileCategoryLinks,
+                  ]}
+                  authLinks={authLinks}
+                />
               </div>
             </div>
           </div>

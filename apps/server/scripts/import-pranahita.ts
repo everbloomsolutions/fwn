@@ -13,6 +13,7 @@ import { config } from '../src/core/config';
 import { logger } from '../src/core/middleware/logger';
 import { Category } from '../src/modules/category/category.model';
 import { Product } from '../src/modules/product/product.model';
+import { generateVariantTemplates } from '../src/modules/product/variantTemplates';
 
 const BASE = 'https://www.pranahitanaturals.com';
 const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
@@ -292,12 +293,13 @@ async function importPranahita() {
         imagePath = await downloadImage(product.imageUrl, filename);
       }
 
-      const baseVariantStock = product.stock > 0 ? Math.max(1, Math.floor(product.stock / 3)) : 0;
-      const variants = [
-        { sku: `PT-${product.id}-500g`, unit: '500g', price: product.price, stock: baseVariantStock, position: 0, isActive: true },
-        { sku: `PT-${product.id}-1kg`, unit: '1kg', price: product.price * 2, stock: baseVariantStock, position: 1, isActive: true },
-        { sku: `PT-${product.id}-2kg`, unit: '2kg', price: product.price * 4, stock: baseVariantStock, position: 2, isActive: true },
-      ];
+      const variants = generateVariantTemplates(
+        categorySlug,
+        product.name,
+        `PT-${product.id}`,
+        product.price,
+        product.stock
+      );
 
       await Product.create({
         sku: `PT-${product.id}`,

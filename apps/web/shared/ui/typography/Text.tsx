@@ -40,22 +40,34 @@ export interface TextProps
   extends Omit<HTMLAttributes<HTMLParagraphElement>, 'color'>,
     VariantProps<typeof textVariants> {
   as?: 'p' | 'span' | 'div';
+  lineClamp?: 1 | 2 | 3 | 4 | 5;
 }
 
+const clampClasses: Record<number, string> = {
+  1: 'line-clamp-1',
+  2: 'line-clamp-2',
+  3: 'line-clamp-3',
+  4: 'line-clamp-4',
+  5: 'line-clamp-5',
+};
+
 const Text = forwardRef<HTMLParagraphElement, TextProps>(
-  ({ className, size, weight, color, as = 'p', ...props }, ref) => {
+  ({ className, size, weight, color, as = 'p', lineClamp, ...props }, ref) => {
     const Component = as;
     const colorValue = color as 'default' | 'muted' | 'light' | 'inverse' | 'error' | 'success' | 'warning' | 'info' | null | undefined;
-    
-    // Apply max-width for paragraphs to ensure readable line length (45-75 characters)
-    // Only apply if className doesn't already specify a max-width
+
     const hasMaxWidth = className && /max-w/.test(className);
     const readableWidth = Component === 'p' && !hasMaxWidth ? 'max-w-[65ch]' : '';
 
     return (
       <Component
         ref={ref}
-        className={cn(textVariants({ size, weight, color: colorValue }), readableWidth, className)}
+        className={cn(
+          textVariants({ size, weight, color: colorValue }),
+          lineClamp && clampClasses[lineClamp],
+          readableWidth,
+          className
+        )}
         {...props}
       />
     );
@@ -65,4 +77,3 @@ const Text = forwardRef<HTMLParagraphElement, TextProps>(
 Text.displayName = 'Text';
 
 export { Text, textVariants };
-

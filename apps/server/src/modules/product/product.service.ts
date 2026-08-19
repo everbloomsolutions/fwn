@@ -1,6 +1,7 @@
 import { Product, IProduct } from './product.model';
 import { Category } from '../category/category.model';
 import mongoose from 'mongoose';
+import { generateVariantTemplates, getUnitDisplay } from './variantTemplates';
 
 export interface CreateProductData {
   sku: string;
@@ -22,6 +23,8 @@ export interface CreateProductData {
   certifications?: string[];
   variants: {
     sku: string;
+    quantity: number;
+    measurement: string;
     unit: string;
     price: number;
     stock: number;
@@ -31,8 +34,15 @@ export interface CreateProductData {
   }[];
 }
 
+function normalizeVariantUnit(variant: CreateProductData['variants'][0]): void {
+  if (variant.quantity && variant.measurement) {
+    variant.unit = getUnitDisplay(variant.quantity, variant.measurement as 'g' | 'kg' | 'ml' | 'ltr' | 'pcs' | 'unit');
+  }
+}
+
 function deriveBaseFields(data: CreateProductData): Partial<CreateProductData> {
   const activeVariants = data.variants.filter((v) => v.isActive !== false);
+  activeVariants.forEach((v) => normalizeVariantUnit(v));
   const sorted = [...activeVariants].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
   const first = sorted[0] || activeVariants[0] || data.variants[0];
   const minPrice = Math.min(...activeVariants.map((v) => v.price));
@@ -51,6 +61,7 @@ export const createProduct = async (data: CreateProductData): Promise<IProduct> 
     throw new Error('Category not found');
   }
 
+  data.variants.forEach((v) => normalizeVariantUnit(v));
   const derived = deriveBaseFields(data);
 
   const product = new Product({
@@ -68,6 +79,7 @@ export interface GetProductsFilters {
   minPrice?: number;
   maxPrice?: number;
   unit?: string;
+  measurement?: string;
   inStock?: boolean;
   isBestSeller?: boolean;
   sort?: 'popular' | 'best_selling' | 'price_asc' | 'price_desc' | 'newest';
@@ -105,6 +117,10 @@ export const getProducts = async (filters: GetProductsFilters = {}): Promise<IPr
 
   if (filters.unit) {
     query['variants.unit'] = filters.unit;
+  }
+
+  if (filters.measurement) {
+    query['variants.measurement'] = filters.measurement;
   }
 
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
@@ -159,6 +175,7 @@ export const updateProduct = async (
   }
 
   if (data.variants) {
+    data.variants.forEach((v) => normalizeVariantUnit(v));
     const derived = deriveBaseFields(data as CreateProductData);
     data.price = derived.price;
     data.unit = derived.unit;
@@ -175,3 +192,5 @@ export const updateProduct = async (
 export const deleteProduct = async (id: string): Promise<IProduct | null> => {
   return await Product.findByIdAndDelete(id).exec();
 };
+
+export { generateVariantTemplates };

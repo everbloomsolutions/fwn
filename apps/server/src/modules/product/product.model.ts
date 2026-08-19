@@ -1,8 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+export type MeasurementUnit = 'g' | 'kg' | 'ml' | 'ltr' | 'pcs' | 'unit';
+
 export interface IProductVariant {
   _id: mongoose.Types.ObjectId;
   sku: string;
+  quantity: number;
+  measurement: MeasurementUnit;
   unit: string;
   price: number;
   stock: number;
@@ -37,6 +41,13 @@ export interface IProduct extends Document {
 const productVariantSchema = new Schema<IProductVariant>(
   {
     sku: { type: String, required: true, trim: true },
+    quantity: { type: Number, required: true, min: 0.01 },
+    measurement: {
+      type: String,
+      enum: ['g', 'kg', 'ml', 'ltr', 'pcs', 'unit'],
+      required: true,
+      default: 'g',
+    },
     unit: { type: String, required: true, trim: true },
     price: { type: Number, required: true, min: 0 },
     stock: { type: Number, required: true, min: 0, default: 0 },
@@ -46,6 +57,13 @@ const productVariantSchema = new Schema<IProductVariant>(
   },
   { _id: true, timestamps: false }
 );
+
+productVariantSchema.pre('validate', function (next) {
+  if (this.quantity && this.measurement) {
+    this.unit = `${this.quantity}${this.measurement}`;
+  }
+  next();
+});
 
 const productSchema = new Schema<IProduct>(
   {
@@ -144,5 +162,6 @@ productSchema.index({ tags: 1 });
 productSchema.index({ isBestSeller: 1 });
 productSchema.index({ name: 'text', description: 'text' });
 productSchema.index({ 'variants.sku': 1 });
+productSchema.index({ 'variants.measurement': 1 });
 
 export const Product = mongoose.model<IProduct>('Product', productSchema);
