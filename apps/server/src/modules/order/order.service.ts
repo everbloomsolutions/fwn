@@ -1,13 +1,18 @@
 import { Order, IOrder, IOrderItem } from './order.model';
 import { Product } from '../product/product.model';
+import { User } from '../user/user.model';
+import { assignCartToUser } from '../cart/cart.service';
 import mongoose from 'mongoose';
 import Razorpay from 'razorpay';
 import { logger } from '../../core/middleware/logger';
 
 export interface CreateOrderData {
   userId?: string;
+  guestId?: string;
   items: IOrderItem[];
   shippingAddress: IOrder['shippingAddress'];
+  paymentMethod: IOrder['paymentMethod'];
+  deliveryNotes?: string;
 }
 
 export const generateOrderNumber = (): string => {
@@ -40,40 +45,112 @@ async function createRazorpayOrder(total: number, orderNumber: string): Promise<
   }
 }
 
+async function findOrCreateGuestUser(shippingAddress: IOrder['shippingAddress']): Promise<mongoose.Types.ObjectId | undefined> {
+  if (!shippingAddress.email) {
+    throw new Error('Email is required for guest checkout');
+  }
+
+  let user = await User.findOne({ email: shippingAddress.email }).exec();
+  if (user) {
+    return user._id as mongoose.Types.ObjectId;
+  }
+
+  const baseEmail = shippingAddress.email.replace(/@/, `+guest@`);
+  user = new User({
+    email: baseEmail.includes('+guest@') ? baseEmail : `guest-${Date.now()}@foodworldnaturals.com`,
+    name: shippingAddress.name,
+    phoneNumber: shippingAddress.phone,
+    role: 'guest',
+    isGuest: true,
+    isActive: true,
+    onboardingCompleted: true,
+  });
+  await user.save();
+  return user._id as mongoose.Types.ObjectId;
+}
+
 export const createOrder = async (data: CreateOrderData): Promise<IOrder> => {
   let subtotal = 0;
+  const populatedItems: IOrderItem[] = [];
 
   for (const item of data.items) {
     const product = await Product.findById(item.product);
     if (!product) {
       throw new Error(`Product not found: ${item.product}`);
     }
-    if (product.stock < item.quantity) {
-      throw new Error(`Insufficient stock for ${product.name}`);
+
+    let price = item.price;
+    let unit = item.unit;
+    let variantId = item.variant;
+
+    if (variantId) {
+      const variant = product.variants.find((v) => v._id.toString() === variantId?.toString());
+      if (variant) {
+        price = variant.price;
+        unit = variant.unit;
+        if (variant.stock < item.quantity) {
+          throw new Error(`Insufficient stock for ${product.name} - ${variant.unit}`);
+        }
+        variant.stock -= item.quantity;
+      } else {
+        throw new Error(`Variant not found for ${product.name}`);
+      }
+    } else {
+      if (product.stock < item.quantity) {
+        throw new Error(`Insufficient stock for ${product.name}`);
+      }
+      product.stock -= item.quantity;
     }
 
-    product.stock -= item.quantity;
     await product.save();
 
-    subtotal += item.price * item.quantity;
+    populatedItems.push({
+      product: product._id as mongoose.Types.ObjectId,
+      variant: variantId,
+      name: product.name,
+      price,
+      quantity: item.quantity,
+      unit,
+    });
+
+    subtotal += price * item.quantity;
   }
 
-  const shipping = 0; // Shipping/tax deferred
+  const shipping = 0;
   const tax = 0;
   const total = subtotal + shipping + tax;
   const orderNumber = generateOrderNumber();
-  const razorpayOrderId = await createRazorpayOrder(total, orderNumber);
+
+  let razorpayOrderId: string | undefined;
+  if (data.paymentMethod === 'razorpay' || data.paymentMethod === 'upi') {
+    razorpayOrderId = await createRazorpayOrder(total, orderNumber);
+  }
+
+  let userId: mongoose.Types.ObjectId | undefined;
+  if (data.userId) {
+    userId = new mongoose.Types.ObjectId(data.userId);
+  } else if (data.guestId) {
+    userId = await findOrCreateGuestUser(data.shippingAddress);
+    if (userId && data.guestId) {
+      await assignCartToUser(data.guestId, userId.toString());
+    }
+  }
 
   const order = new Order({
-    userId: data.userId ? new mongoose.Types.ObjectId(data.userId) : undefined,
+    userId,
     orderNumber,
-    items: data.items,
+    items: populatedItems,
     subtotal,
     shipping,
     tax,
     total,
+    paymentMethod: data.paymentMethod,
     shippingAddress: data.shippingAddress,
+    deliveryNotes: data.deliveryNotes,
     razorpayOrderId,
+    status: 'pending',
+    paymentStatus: 'pending',
+    estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days
   });
 
   return await order.save();
@@ -89,6 +166,14 @@ export const getOrders = async (userId?: string, isAdmin = false): Promise<IOrde
 
 export const getOrderById = async (id: string): Promise<IOrder | null> => {
   return await Order.findById(id).exec();
+};
+
+export const getOrderByNumber = async (orderNumber: string): Promise<IOrder | null> => {
+  return await Order.findOne({ orderNumber }).exec();
+};
+
+export const getOrderByNumberAndPhone = async (orderNumber: string, phone: string): Promise<IOrder | null> => {
+  return await Order.findOne({ orderNumber, 'shippingAddress.phone': phone }).exec();
 };
 
 export const updateOrderStatus = async (

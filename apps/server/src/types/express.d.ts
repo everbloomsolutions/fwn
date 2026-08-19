@@ -4,7 +4,7 @@ declare global {
   namespace Express {
     interface User extends IUser {
       _id: string | { toString(): string };
-      role: 'user' | 'admin';
+      role: 'user' | 'admin' | 'guest';
     }
   }
 }

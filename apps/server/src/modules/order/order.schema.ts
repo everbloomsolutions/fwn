@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const orderItemSchema = z.object({
   product: z.string().min(2, 'Product ID is required'),
+  variant: z.string().min(2, 'Variant ID is required').optional(),
   name: z.string().min(2, 'Product name is required'),
   price: z.number().min(0, 'Price must be non-negative'),
   quantity: z.number().int().min(1, 'Quantity must be at least 1'),
@@ -10,6 +11,7 @@ export const orderItemSchema = z.object({
 
 export const shippingAddressSchema = z.object({
   name: z.string().min(2, 'Name is required'),
+  email: z.string().email().optional(),
   phone: z.string().min(10, 'Phone is required'),
   address: z.string().min(10, 'Address is required'),
   city: z.string().min(2, 'City is required'),
@@ -20,6 +22,8 @@ export const shippingAddressSchema = z.object({
 export const createOrderSchema = z.object({
   items: z.array(orderItemSchema).min(1, 'At least one item is required'),
   shippingAddress: shippingAddressSchema,
+  paymentMethod: z.enum(['cod', 'razorpay', 'upi']).default('cod'),
+  deliveryNotes: z.string().optional(),
 });
 
 export const updateOrderStatusSchema = z.object({

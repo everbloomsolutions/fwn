@@ -2,9 +2,11 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
+export type PaymentMethod = 'cod' | 'razorpay' | 'upi';
 
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;
+  variant?: mongoose.Types.ObjectId;
   name: string;
   price: number;
   quantity: number;
@@ -21,16 +23,20 @@ export interface IOrder extends Document {
   total: number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
+  paymentMethod: PaymentMethod;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
   shippingAddress: {
     name: string;
+    email?: string;
     phone: string;
     address: string;
     city: string;
     state: string;
     pincode: string;
   };
+  deliveryNotes?: string;
+  estimatedDelivery?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +44,7 @@ export interface IOrder extends Document {
 const orderItemSchema = new Schema<IOrderItem>(
   {
     product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+    variant: { type: Schema.Types.ObjectId },
     name: { type: String, required: true },
     price: { type: Number, required: true, min: 0 },
     quantity: { type: Number, required: true, min: 1 },
@@ -57,6 +64,7 @@ const orderSchema = new Schema<IOrder>(
       type: String,
       required: true,
       unique: true,
+      index: true,
     },
     items: [orderItemSchema],
     subtotal: {
@@ -89,6 +97,11 @@ const orderSchema = new Schema<IOrder>(
       enum: ['pending', 'completed', 'failed', 'refunded'],
       default: 'pending',
     },
+    paymentMethod: {
+      type: String,
+      enum: ['cod', 'razorpay', 'upi'],
+      required: true,
+    },
     razorpayOrderId: {
       type: String,
     },
@@ -97,11 +110,18 @@ const orderSchema = new Schema<IOrder>(
     },
     shippingAddress: {
       name: { type: String, required: true },
+      email: { type: String },
       phone: { type: String, required: true },
       address: { type: String, required: true },
       city: { type: String, required: true },
       state: { type: String, required: true },
       pincode: { type: String, required: true },
+    },
+    deliveryNotes: {
+      type: String,
+    },
+    estimatedDelivery: {
+      type: Date,
     },
   },
   {

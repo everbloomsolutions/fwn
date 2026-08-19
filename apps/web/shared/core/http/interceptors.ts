@@ -4,9 +4,10 @@
 
 import { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { getToken, removeToken } from '@/modules/auth/services/tokenService';
+import { getGuestId } from '@/modules/shop/services/guestService';
 
 /**
- * Setup request interceptor to add auth token
+ * Setup request interceptor to add auth token and guest ID
  */
 export function setupRequestInterceptor(instance: AxiosInstance): void {
   instance.interceptors.request.use(
@@ -14,6 +15,10 @@ export function setupRequestInterceptor(instance: AxiosInstance): void {
       const token = getToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
+      }
+      const guestId = getGuestId();
+      if (guestId && config.headers) {
+        config.headers['X-Guest-ID'] = guestId;
       }
       return config;
     },

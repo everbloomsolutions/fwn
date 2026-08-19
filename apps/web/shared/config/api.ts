@@ -56,10 +56,21 @@ export const API_ENDPOINTS = {
     DETAIL: (slug: string) => `${API_BASE}/categories/${slug}`,
   },
 
+  // Cart
+  cart: {
+    GET: `${API_BASE}/cart`,
+    ADD_ITEM: `${API_BASE}/cart/items`,
+    UPDATE_ITEM: (variantId: string) => `${API_BASE}/cart/items/${variantId}`,
+    REMOVE_ITEM: (variantId: string) => `${API_BASE}/cart/items/${variantId}`,
+    CLEAR: `${API_BASE}/cart`,
+  },
+
   // Orders
   orders: {
     CREATE: `${API_BASE}/orders`,
     LIST: `${API_BASE}/orders`,
     DETAIL: (id: string) => `${API_BASE}/orders/${id}`,
+    TRACK: `${API_BASE}/orders/track`,
+    PAYMENT: `${API_BASE}/orders/payment/confirm`,
   },
 } as const;

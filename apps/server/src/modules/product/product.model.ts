@@ -1,5 +1,16 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+export interface IProductVariant {
+  _id: mongoose.Types.ObjectId;
+  sku: string;
+  unit: string;
+  price: number;
+  stock: number;
+  mrp?: number;
+  isActive: boolean;
+  position: number;
+}
+
 export interface IProduct extends Document {
   sku: string;
   name: string;
@@ -12,12 +23,29 @@ export interface IProduct extends Document {
   images: string[];
   tags: string[];
   isActive: boolean;
+  isBestSeller: boolean;
+  rating?: number;
+  reviewCount?: number;
   nutrition?: Record<string, string>;
   ingredients?: string[];
   certifications?: string[];
+  variants: IProductVariant[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const productVariantSchema = new Schema<IProductVariant>(
+  {
+    sku: { type: String, required: true, trim: true },
+    unit: { type: String, required: true, trim: true },
+    price: { type: Number, required: true, min: 0 },
+    stock: { type: Number, required: true, min: 0, default: 0 },
+    mrp: { type: Number, min: 0 },
+    isActive: { type: Boolean, default: true },
+    position: { type: Number, default: 0 },
+  },
+  { _id: true, timestamps: false }
+);
 
 const productSchema = new Schema<IProduct>(
   {
@@ -78,6 +106,20 @@ const productSchema = new Schema<IProduct>(
       type: Boolean,
       default: true,
     },
+    isBestSeller: {
+      type: Boolean,
+      default: false,
+    },
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+    },
+    reviewCount: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
     nutrition: {
       type: Schema.Types.Mixed,
       default: {},
@@ -90,6 +132,7 @@ const productSchema = new Schema<IProduct>(
       type: String,
       trim: true,
     }],
+    variants: [productVariantSchema],
   },
   {
     timestamps: true,
@@ -98,6 +141,8 @@ const productSchema = new Schema<IProduct>(
 
 productSchema.index({ category: 1, isActive: 1 });
 productSchema.index({ tags: 1 });
+productSchema.index({ isBestSeller: 1 });
 productSchema.index({ name: 'text', description: 'text' });
+productSchema.index({ 'variants.sku': 1 });
 
 export const Product = mongoose.model<IProduct>('Product', productSchema);

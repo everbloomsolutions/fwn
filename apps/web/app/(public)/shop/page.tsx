@@ -1,14 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useEffect, useState, useMemo } from 'react';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
-import { PUBLIC_ROUTES } from '@/shared/config/routes';
-import { Container, Heading, Text, Card, CardContent, CardHeader, CardTitle, BackToTop } from '@/shared/ui';
+import { ProductCard } from '@/modules/shop/components/ProductCard';
+import { Container, Heading, Text, BackToTop } from '@/shared/ui';
+import { Search, SlidersHorizontal, Loader2 } from 'lucide-react';
 
-import { ShoppingCart } from 'lucide-react';
+interface ProductVariant {
+  _id: string;
+  unit: string;
+  price: number;
+  stock: number;
+  isActive: boolean;
+}
 
 interface Product {
   _id: string;
@@ -18,7 +23,12 @@ interface Product {
   unit: string;
   stock: number;
   images: string[];
+  isBestSeller: boolean;
+  rating?: number;
+  reviewCount?: number;
   category: { name: string };
+  variants: ProductVariant[];
+  updatedAt?: string;
 }
 
 interface ProductResponse {
@@ -26,14 +36,23 @@ interface ProductResponse {
   data: Product[];
 }
 
+type SortOption = 'newest' | 'popular' | 'best_selling' | 'price_asc' | 'price_desc';
+
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [search, setSearch] = useState('');
+  const [selectedUnit, setSelectedUnit] = useState<string>('');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [bestSellerOnly, setBestSellerOnly] = useState(false);
+
   useEffect(() => {
     async function loadProducts() {
       try {
+        setLoading(true);
         const response = await apiRequest<ProductResponse>({
           method: 'GET',
           url: API_ENDPOINTS.products.LIST,
@@ -48,25 +67,50 @@ export default function ShopPage() {
     loadProducts();
   }, []);
 
-  if (loading) {
-    return (
-      <Container maxWidth="xl" className="py-16 text-center">
-        <Text className="text-text-muted">Loading products...</Text>
-      </Container>
-    );
-  }
+  const filteredProducts = useMemo(() => {
+    let list = [...products];
 
-  if (error) {
-    return (
-      <Container maxWidth="xl" className="py-16 text-center">
-        <Text className="text-error">{error}</Text>
-      </Container>
-    );
-  }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter((p) => p.name.toLowerCase().includes(q) || p.category.name.toLowerCase().includes(q));
+    }
+
+    if (selectedUnit) {
+      list = list.filter((p) => p.variants.some((v) => v.unit === selectedUnit && v.isActive !== false));
+    }
+
+    if (inStockOnly) {
+      list = list.filter((p) => p.stock > 0);
+    }
+
+    if (bestSellerOnly) {
+      list = list.filter((p) => p.isBestSeller);
+    }
+
+    switch (sortBy) {
+      case 'price_asc':
+        list.sort((a, b) => a.price - b.price);
+        break;
+      case 'price_desc':
+        list.sort((a, b) => b.price - a.price);
+        break;
+      case 'popular':
+        list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'best_selling':
+        list.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
+        break;
+      case 'newest':
+      default:
+        list.sort((a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime());
+    }
+
+    return list;
+  }, [products, search, selectedUnit, sortBy, inStockOnly, bestSellerOnly]);
 
   return (
     <Container maxWidth="xl" className="py-8 sm:py-12 lg:py-16">
-      <div className="text-center mb-12">
+      <div className="text-center mb-8">
         <Heading level="h1" className="mb-4">
           Shop Natural Foods
         </Heading>
@@ -75,48 +119,85 @@ export default function ShopPage() {
         </Text>
       </div>
 
-      {products.length === 0 ? (
-        <div className="text-center py-16">
-          <Text className="text-text-muted">No products available yet. Please check back soon.</Text>
+      <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-border bg-surface p-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+          <input
+            type="text"
+            placeholder="Search products or categories..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-lg border border-border bg-bg py-2.5 pl-9 pr-4 text-sm text-text outline-none focus:border-primary"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-text-muted">
+            <SlidersHorizontal className="h-4 w-4" />
+            <span>Filters:</span>
+          </div>
+
+          <select
+            value={selectedUnit}
+            onChange={(e) => setSelectedUnit(e.target.value)}
+            className="rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+          >
+            <option value="">All packs</option>
+            <option value="500g">500g</option>
+            <option value="1kg">1kg</option>
+            <option value="2kg">2kg</option>
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+          >
+            <option value="newest">Newest</option>
+            <option value="popular">Popular</option>
+            <option value="best_selling">Best Selling</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+          </select>
+
+          <label className="flex items-center gap-2 text-sm text-text">
+            <input
+              type="checkbox"
+              checked={inStockOnly}
+              onChange={(e) => setInStockOnly(e.target.checked)}
+              className="h-4 w-4 accent-primary"
+            />
+            In Stock
+          </label>
+
+          <label className="flex items-center gap-2 text-sm text-text">
+            <input
+              type="checkbox"
+              checked={bestSellerOnly}
+              onChange={(e) => setBestSellerOnly(e.target.checked)}
+              className="h-4 w-4 accent-primary"
+            />
+            Best Sellers
+          </label>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : error ? (
+        <div className="py-16 text-center">
+          <Text className="text-error">{error}</Text>
+        </div>
+      ) : filteredProducts.length === 0 ? (
+        <div className="py-16 text-center">
+          <Text className="text-text-muted">No products found. Try a different search or filter.</Text>
         </div>
       ) : (
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map(product => (
-            <Card key={product._id} className="group overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
-              <Link href={PUBLIC_ROUTES.PRODUCT(product.slug)}>
-                <div className="relative h-56 w-full overflow-hidden bg-bg-muted">
-                  <Image
-                    src={product.images[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=600&fit=crop'}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                </div>
-              </Link>
-              <CardHeader className="pb-2">
-                <Text className="text-xs text-text-muted uppercase tracking-wide">{product.category.name}</Text>
-                <CardTitle className="text-lg">
-                  <Link href={PUBLIC_ROUTES.PRODUCT(product.slug)} className="hover:text-primary">
-                    {product.name}
-                  </Link>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <Text className="font-semibold text-primary">
-                    ₹{product.price} <span className="text-sm font-normal text-text-muted">/ {product.unit}</span>
-                  </Text>
-                  <Link
-                    href={PUBLIC_ROUTES.PRODUCT(product.slug)}
-                    className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover"
-                  >
-                    <ShoppingCart className="h-4 w-4" />
-                    View
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredProducts.map((product) => (
+            <ProductCard key={product._id} product={product} />
           ))}
         </div>
       )}

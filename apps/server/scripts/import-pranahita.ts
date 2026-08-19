@@ -292,6 +292,13 @@ async function importPranahita() {
         imagePath = await downloadImage(product.imageUrl, filename);
       }
 
+      const baseVariantStock = product.stock > 0 ? Math.max(1, Math.floor(product.stock / 3)) : 0;
+      const variants = [
+        { sku: `PT-${product.id}-500g`, unit: '500g', price: product.price, stock: baseVariantStock, position: 0, isActive: true },
+        { sku: `PT-${product.id}-1kg`, unit: '1kg', price: product.price * 2, stock: baseVariantStock, position: 1, isActive: true },
+        { sku: `PT-${product.id}-2kg`, unit: '2kg', price: product.price * 4, stock: baseVariantStock, position: 2, isActive: true },
+      ];
+
       await Product.create({
         sku: `PT-${product.id}`,
         name: product.name,
@@ -304,7 +311,9 @@ async function importPranahita() {
         images: imagePath ? [imagePath] : [],
         tags: ['organic', 'natural'],
         isActive: true,
+        isBestSeller: false,
         nutrition: {},
+        variants,
       });
 
       created++;

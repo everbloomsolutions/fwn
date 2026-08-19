@@ -14,6 +14,7 @@ import contactRoutes from '../../modules/content/contact.routes';
 import projectRoutes from '../../modules/project/project.routes';
 import productRoutes from '../../modules/product/product.routes';
 import categoryRoutes from '../../modules/category/category.routes';
+import cartRoutes from '../../modules/cart/cart.routes';
 import orderRoutes from '../../modules/order/order.routes';
 import notificationRoutes from '../../modules/notification/notification.routes';
 import analyticsRoutes from '../../modules/analytics/analytics.routes';
@@ -81,7 +82,7 @@ const createApp = (): Express => {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Guest-ID'],
   };
   app.use(cors(corsOptions));
 
@@ -176,6 +177,7 @@ const createApp = (): Express => {
   app.use('/api/v1/projects', projectRoutes);
   app.use('/api/v1/categories', categoryRoutes);
   app.use('/api/v1/products', productRoutes);
+  app.use('/api/v1/cart', cartRoutes);
   app.use('/api/v1/orders', orderRoutes);
   app.use('/api/v1/notifications', notificationRoutes);
   app.use('/api/v1/analytics', analyticsRoutes);

@@ -1,12 +1,15 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+export type UserRole = 'user' | 'admin' | 'guest';
+
 export interface IUser extends Document {
   email: string;
   password?: string;
   name?: string;
-  role: 'user' | 'admin';
+  role: UserRole;
   isActive: boolean;
+  isGuest: boolean;
   oauthProvider?: 'google' | 'facebook' | 'linkedin';
   oauthId?: string;
   avatar?: string;
@@ -25,8 +28,9 @@ export interface IUserResponse {
   _id: string;
   email: string;
   name?: string;
-  role: 'user' | 'admin';
+  role: UserRole;
   isActive: boolean;
+  isGuest: boolean;
   oauthProvider?: 'google' | 'facebook' | 'linkedin';
   oauthId?: string;
   avatar?: string;
@@ -65,11 +69,13 @@ const userSchema = new Schema<IUser>(
     password: {
       type: String,
       required: function (this: IUser) {
-        return !this.oauthProvider;
+        return !this.oauthProvider && !this.isGuest;
       },
       minlength: [8, 'Password must be at least 8 characters long'],
       validate: {
         validator: function (v: string) {
+          // Allow empty/undefined if guest or OAuth
+          if (!v) return true;
           // Require at least: 1 lowercase, 1 uppercase, 1 number
           return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(v);
         },
@@ -82,12 +88,16 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
+      enum: ['user', 'admin', 'guest'],
       default: 'user',
     },
     isActive: {
       type: Boolean,
       default: true,
+    },
+    isGuest: {
+      type: Boolean,
+      default: false,
     },
     oauthProvider: {
       type: String,
@@ -147,4 +157,3 @@ userSchema.methods.comparePassword = async function (
 };
 
 export const User = mongoose.model<IUser>('User', userSchema);
-

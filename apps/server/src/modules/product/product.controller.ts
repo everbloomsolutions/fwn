@@ -12,11 +12,18 @@ export const getProducts = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { category, active } = req.query;
-    const products = await productService.getProducts(
-      category as string | undefined,
-      active ? active === 'true' : true
-    );
+    const filters: productService.GetProductsFilters = {
+      category: req.query.category as string | undefined,
+      active: req.query.active !== undefined ? req.query.active === 'true' : true,
+      search: req.query.search as string | undefined,
+      minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
+      maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
+      unit: req.query.unit as string | undefined,
+      inStock: req.query.inStock === 'true',
+      isBestSeller: req.query.isBestSeller === 'true',
+      sort: (req.query.sort as productService.GetProductsFilters['sort']) || undefined,
+    };
+    const products = await productService.getProducts(filters);
     res.status(200).json({ success: true, data: products });
   } catch (error) {
     next(error);

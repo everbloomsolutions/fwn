@@ -60,6 +60,35 @@ export const authenticate = async (
   }
 };
 
+export const optionalAuthenticate = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+
+      if (token) {
+        const isBlacklisted = await isTokenBlacklisted(token);
+        if (!isBlacklisted) {
+          const decoded = verifyToken(token);
+          const user = await User.findById(decoded.userId).select('-password');
+          if (user && user.isActive) {
+            req.user = user as Express.User;
+          }
+        }
+      }
+    }
+
+    next();
+  } catch {
+    next();
+  }
+};
+
 export const requireAdmin = (
   req: Request,
   _res: Response,
