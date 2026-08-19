@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "buildCommand": "cd ../.. && pnpm build --filter=@fwn/server",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["src/**", "api/**"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.ts"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+version: '3.8'
+
+# Podman Compose configuration for Server
+# Usage: podman-compose up -d
+# Or: podman play kube podman-compose.yml (requires conversion to K8s YAML)
+
+services:
+  redis:
+    image: docker.io/library/redis:7-alpine
+    container_name: server-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - server-redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - server-network
+
+  # Optional: MongoDB service (if not using external MongoDB)
+  # mongo:
+  #   image: mongo:7
+  #   container_name: server-mongo
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - server-mongo-data:/data/db
+  #   restart: unless-stopped
+  #   networks:
+  #     - server-network
+
+volumes:
+  server-redis-data:
+    driver: local
+  # server-mongo-data:
+  #   driver: local
+
+networks:
+  server-network:
+    driver: bridge
+

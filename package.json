@@ -1,0 +1,57 @@
+{
+  "name": "fwn",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Foodworld Naturals monorepo - Natural food products e-commerce",
+  "scripts": {
+    "predev": "node scripts/kill-dev-ports.js",
+    "dev": "dotenv -e .env.development -e .env -- turbo dev",
+    "build": "dotenv -e .env.production -e .env.production -- turbo build",
+    "start": "dotenv -e .env.production -e .env.production -- turbo start",
+    "test": "dotenv -e .env.development -e .env -- turbo test",
+    "test:all": "dotenv -e .env.development -e .env -- turbo test",
+    "test:coverage": "dotenv -e .env.development -e .env -- turbo test -- --coverage",
+    "test:ci": "dotenv -e .env.development -e .env -- turbo test -- --coverage --run",
+    "lint": "dotenv -e .env.development -e .env -- turbo lint",
+    "type-check": "dotenv -e .env.development -e .env -- turbo type-check",
+    "clean": "turbo clean && pnpm --filter @fwn/server clean && pnpm --filter @fwn/web clean",
+    "clean:all": "pnpm clean && rm -rf node_modules apps/*/node_modules packages/*/node_modules .turbo",
+    "dev:backend": "dotenv -e .env.development -e .env -- pnpm --filter @fwn/server dev",
+    "dev:frontend": "dotenv -e .env.development -e .env -- pnpm --filter @fwn/web dev",
+    "build:backend": "pnpm --filter @fwn/server build",
+    "build:frontend": "pnpm --filter @fwn/web build",
+    "start:backend": "pnpm --filter @fwn/server start",
+    "start:frontend": "pnpm --filter @fwn/web start",
+    "test:backend": "pnpm --filter @fwn/server test",
+    "test:frontend": "pnpm --filter @fwn/web test",
+    "lint:backend": "pnpm --filter @fwn/server lint",
+    "lint:frontend": "pnpm --filter @fwn/web lint",
+    "type-check:backend": "pnpm --filter @fwn/server type-check",
+    "type-check:frontend": "pnpm --filter @fwn/web type-check",
+    "audit": "pnpm audit --recursive",
+    "outdated": "pnpm outdated --recursive",
+    "redis:start": "bash scripts/start-redis.sh",
+    "redis:stop": "podman stop fwn-redis 2>/dev/null || docker stop fwn-redis 2>/dev/null || echo 'Redis container not running'",
+    "redis:status": "podman ps --filter name=fwn-redis --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null || docker ps --filter name=fwn-redis --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null || echo 'Redis container not found'",
+    "env:setup": "node scripts/setup-env.js",
+    "env:validate": "node scripts/validate-env.js",
+    "env:check": "node scripts/validate-env.js --check-only"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0",
+    "kill-port": "^2.0.1",
+    "turbo": "^2.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "keywords": [
+    "monorepo",
+    "backend",
+    "frontend"
+  ],
+  "author": "",
+  "license": "ISC"
+}
