@@ -1,6 +1,8 @@
 import { Order, IOrder, IOrderItem } from './order.model';
 import { Product } from '../product/product.model';
 import mongoose from 'mongoose';
+import Razorpay from 'razorpay';
+import { logger } from '../../core/middleware/logger';
 
 export interface CreateOrderData {
   userId?: string;
@@ -14,6 +16,29 @@ export const generateOrderNumber = (): string => {
   const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   return `${prefix}-${timestamp}-${random}`;
 };
+
+async function createRazorpayOrder(total: number, orderNumber: string): Promise<string | undefined> {
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !keySecret) {
+    logger.info('Razorpay not configured; skipping payment order creation');
+    return undefined;
+  }
+
+  try {
+    const rzp = new Razorpay({ key_id: keyId, key_secret: keySecret });
+    const order = await rzp.orders.create({
+      amount: Math.round(total * 100),
+      currency: 'INR',
+      receipt: orderNumber,
+      notes: { orderNumber },
+    });
+    return order.id;
+  } catch (error) {
+    logger.warn('Razorpay order creation failed:', error);
+    return undefined;
+  }
+}
 
 export const createOrder = async (data: CreateOrderData): Promise<IOrder> => {
   let subtotal = 0;
@@ -36,16 +61,19 @@ export const createOrder = async (data: CreateOrderData): Promise<IOrder> => {
   const shipping = 0; // Shipping/tax deferred
   const tax = 0;
   const total = subtotal + shipping + tax;
+  const orderNumber = generateOrderNumber();
+  const razorpayOrderId = await createRazorpayOrder(total, orderNumber);
 
   const order = new Order({
     userId: data.userId ? new mongoose.Types.ObjectId(data.userId) : undefined,
-    orderNumber: generateOrderNumber(),
+    orderNumber,
     items: data.items,
     subtotal,
     shipping,
     tax,
     total,
     shippingAddress: data.shippingAddress,
+    razorpayOrderId,
   });
 
   return await order.save();

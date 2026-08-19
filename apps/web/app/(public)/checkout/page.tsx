@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Heading, Text, Card, CardContent, BackToTop } from '@/shared/ui';
 import { useToast } from '@/shared/ui';
@@ -21,6 +21,25 @@ interface OrderResponse {
   message?: string;
 }
 
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
+
+function loadRazorpayScript(): Promise<void> {
+  if (typeof window === 'undefined') return Promise.resolve();
+  if (window.Razorpay) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load Razorpay script'));
+    document.body.appendChild(script);
+  });
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { success, error: showError } = useToast();
@@ -34,6 +53,16 @@ export default function CheckoutPage() {
     state: '',
     pincode: '',
   });
+
+  const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+
+  useEffect(() => {
+    if (razorpayKey) {
+      loadRazorpayScript().catch(err => {
+        console.warn('Razorpay script load failed:', err);
+      });
+    }
+  }, [razorpayKey]);
 
   if (items.length === 0) {
     return (
@@ -76,8 +105,7 @@ export default function CheckoutPage() {
         },
       });
 
-      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-      if (razorpayKey && response.data.razorpayOrderId && typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).Razorpay) {
+      if (razorpayKey && response.data.razorpayOrderId && window.Razorpay) {
         const options = {
           key: razorpayKey,
           amount: response.data.total * 100,
@@ -96,7 +124,7 @@ export default function CheckoutPage() {
           },
           theme: { color: '#10b981' },
         };
-        const rzp = new ((window as unknown as Record<string, unknown>).Razorpay as { new (opts: typeof options): { open: () => void } })(options);
+        const rzp = new window.Razorpay(options);
         rzp.open();
       } else {
         success('Order placed', `Order ${response.data.orderNumber} created. Razorpay payment will be enabled once the key is configured.`);
@@ -158,7 +186,7 @@ export default function CheckoutPage() {
                 </label>
                 <textarea
                   id="address"
-                name="address"
+                  name="address"
                   value={form.address}
                   onChange={handleChange}
                   required
@@ -180,7 +208,7 @@ export default function CheckoutPage() {
                     onChange={handleChange}
                     required
                     className="w-full rounded-lg border border-border bg-surface px-4 py-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="Bangalore"
+                    placeholder="Hyderabad"
                   />
                 </div>
                 <div>
@@ -194,7 +222,7 @@ export default function CheckoutPage() {
                     onChange={handleChange}
                     required
                     className="w-full rounded-lg border border-border bg-surface px-4 py-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="Karnataka"
+                    placeholder="Telangana"
                   />
                 </div>
                 <div>
@@ -208,7 +236,7 @@ export default function CheckoutPage() {
                     onChange={handleChange}
                     required
                     className="w-full rounded-lg border border-border bg-surface px-4 py-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="560034"
+                    placeholder="500049"
                   />
                 </div>
               </div>
