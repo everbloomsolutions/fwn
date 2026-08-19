@@ -97,7 +97,6 @@ const productSchema = new Schema<IProduct>(
 );
 
 productSchema.index({ category: 1, isActive: 1 });
-productSchema.index({ slug: 1 });
 productSchema.index({ tags: 1 });
 productSchema.index({ name: 'text', description: 'text' });
 
