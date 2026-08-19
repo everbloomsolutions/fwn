@@ -7,11 +7,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { setToken, removeToken } from '../services/tokenService';
 
+export type UserRole = 'user' | 'admin' | 'guest';
+
 export interface User {
   _id: string;
   email: string;
   name?: string;
-  role: 'user';
+  role: UserRole;
   isActive: boolean;
   onboardingCompleted?: boolean;
   onboardingCompletedAt?: string;

@@ -35,3 +35,13 @@ export const createProductSchema = z.object({
 });
 
 export const updateProductSchema = createProductSchema.partial();
+
+const inventoryUpdateItemSchema = z.object({
+  variantId: z.string().min(2, 'Variant ID is required'),
+  stock: z.number().min(0, 'Stock must be non-negative').optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const updateInventorySchema = z.object({
+  variants: z.array(inventoryUpdateItemSchema).min(1, 'At least one variant update is required'),
+});

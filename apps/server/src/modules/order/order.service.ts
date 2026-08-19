@@ -2,6 +2,7 @@ import { Order, IOrder, IOrderItem } from './order.model';
 import { Product } from '../product/product.model';
 import { User } from '../user/user.model';
 import { assignCartToUser } from '../cart/cart.service';
+import { updateTopBestSellers } from '../product/product.service';
 import mongoose from 'mongoose';
 import Razorpay from 'razorpay';
 import { logger } from '../../core/middleware/logger';
@@ -153,13 +154,54 @@ export const createOrder = async (data: CreateOrderData): Promise<IOrder> => {
     estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days
   });
 
-  return await order.save();
+  const savedOrder = await order.save();
+
+  // Update sales counts and best-seller flags
+  await Promise.all(
+    populatedItems.map((item) =>
+      Product.updateOne({ _id: item.product }, { $inc: { salesCount: item.quantity } })
+    )
+  );
+  await updateTopBestSellers().catch((err) => logger.warn('Failed to update best sellers:', err));
+
+  return savedOrder;
 };
 
-export const getOrders = async (userId?: string, isAdmin = false): Promise<IOrder[]> => {
+export interface GetOrdersFilters {
+  status?: IOrder['status'];
+  paymentStatus?: IOrder['paymentStatus'];
+  startDate?: Date;
+  endDate?: Date;
+  search?: string;
+}
+
+export const getOrders = async (
+  userId?: string,
+  isAdmin = false,
+  filters: GetOrdersFilters = {}
+): Promise<IOrder[]> => {
   const query: Record<string, unknown> = {};
   if (!isAdmin && userId) {
     query.userId = new mongoose.Types.ObjectId(userId);
+  }
+  if (filters.status) {
+    query.status = filters.status;
+  }
+  if (filters.paymentStatus) {
+    query.paymentStatus = filters.paymentStatus;
+  }
+  if (filters.startDate || filters.endDate) {
+    query.createdAt = {};
+    if (filters.startDate) (query.createdAt as Record<string, Date>).$gte = filters.startDate;
+    if (filters.endDate) (query.createdAt as Record<string, Date>).$lte = filters.endDate;
+  }
+  if (filters.search) {
+    const re = new RegExp(filters.search, 'i');
+    query.$or = [
+      { orderNumber: re },
+      { 'shippingAddress.name': re },
+      { 'shippingAddress.phone': re },
+    ];
   }
   return await Order.find(query).sort({ createdAt: -1 }).exec();
 };
@@ -180,5 +222,20 @@ export const updateOrderStatus = async (
   id: string,
   data: { status?: IOrder['status']; paymentStatus?: IOrder['paymentStatus'] }
 ): Promise<IOrder | null> => {
-  return await Order.findByIdAndUpdate(id, { $set: data }, { new: true }).exec();
+  const order = await Order.findByIdAndUpdate(id, { $set: data }, { new: true }).exec();
+  if (order && data.status === 'cancelled') {
+    for (const item of order.items) {
+      const product = await Product.findById(item.product);
+      if (!product) continue;
+      const variant = product.variants.find((v) => v._id.toString() === item.variant?.toString());
+      if (variant) {
+        variant.stock += item.quantity;
+      } else {
+        product.stock += item.quantity;
+      }
+      product.stock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+      await product.save();
+    }
+  }
+  return order;
 };

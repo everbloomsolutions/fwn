@@ -22,6 +22,7 @@ export const getProducts = async (
       inStock: req.query.inStock === 'true',
       isBestSeller: req.query.isBestSeller === 'true',
       sort: (req.query.sort as productService.GetProductsFilters['sort']) || undefined,
+      limit: req.query.limit ? Number(req.query.limit) : undefined,
     };
     const products = await productService.getProducts(filters);
     res.status(200).json({ success: true, data: products });
@@ -86,6 +87,22 @@ export const deleteProduct = async (
       throw new AppError('Product not found', 404);
     }
     res.status(200).json({ success: true, message: 'Product deleted' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProductInventory = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const product = await productService.updateProductInventory(req.params.id, req.body.variants);
+    if (!product) {
+      throw new AppError('Product not found', 404);
+    }
+    res.status(200).json({ success: true, data: product, message: 'Inventory updated' });
   } catch (error) {
     next(error);
   }

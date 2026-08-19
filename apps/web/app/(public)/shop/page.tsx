@@ -57,6 +57,7 @@ export default function ShopPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || '';
+  const initialBestSeller = searchParams.get('isBestSeller') === 'true';
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -68,7 +69,7 @@ export default function ShopPage() {
   const [selectedPacks, setSelectedPacks] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [bestSellerOnly, setBestSellerOnly] = useState(false);
+  const [bestSellerOnly, setBestSellerOnly] = useState(initialBestSeller);
 
   useEffect(() => {
     async function load() {
@@ -160,10 +161,16 @@ export default function ShopPage() {
     <Container maxWidth="xl" className="py-6 sm:py-12 lg:py-16">
       <div className="text-center mb-6 sm:mb-8">
         <Heading level="h1" balance className="mb-3">
-          {activeCategory ? activeCategory.name : 'Shop Natural Foods'}
+          {bestSellerOnly
+            ? 'Best Sellers'
+            : activeCategory
+            ? activeCategory.name
+            : 'Shop Natural Foods'}
         </Heading>
         <Text className="mx-auto max-w-2xl text-text-muted">
-          {activeCategory
+          {bestSellerOnly
+            ? 'Our most-loved natural products, handpicked by customers like you.'
+            : activeCategory
             ? `Explore natural products in ${activeCategory.name}`
             : 'Browse our collection of natural, wholesome food products sourced responsibly for you.'}
         </Text>

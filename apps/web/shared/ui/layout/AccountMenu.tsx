@@ -6,7 +6,7 @@ import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { Popover } from '@/shared/ui/overlays/Popover';
 import { Avatar } from '@/shared/ui/data/Avatar';
 import { Button } from '@/shared/ui';
-import { User, Settings, LogOut, ChevronDown, Mail } from 'lucide-react';
+import { User, Settings, LogOut, ChevronDown, Mail, ShoppingBag, Shield } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import Link from 'next/link';
 import { PUBLIC_ROUTES } from '@/shared/config/routes';
@@ -104,6 +104,16 @@ export function AccountMenu() {
           <span className="font-medium">Profile</span>
         </Link>
         <Link
+          href="/profile/orders"
+          onClick={() => setIsOpen(false)}
+          className="flex items-center gap-3 px-4 py-2.5 text-sm text-text hover:bg-surface-hover rounded-lg transition-all duration-200 hover:translate-x-1 group"
+        >
+          <div className="p-1.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+            <ShoppingBag className="h-4 w-4 text-primary" />
+          </div>
+          <span className="font-medium">My Orders</span>
+        </Link>
+        <Link
           href="/settings"
           onClick={() => setIsOpen(false)}
           className="flex items-center gap-3 px-4 py-2.5 text-sm text-text hover:bg-surface-hover rounded-lg transition-all duration-200 hover:translate-x-1 group"
@@ -113,6 +123,18 @@ export function AccountMenu() {
           </div>
           <span className="font-medium">Settings</span>
         </Link>
+        {user?.role === 'admin' && (
+          <Link
+            href="/admin/inventory"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 px-4 py-2.5 text-sm text-text hover:bg-surface-hover rounded-lg transition-all duration-200 hover:translate-x-1 group"
+          >
+            <div className="p-1.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <Shield className="h-4 w-4 text-primary" />
+            </div>
+            <span className="font-medium">Admin</span>
+          </Link>
+        )}
       </div>
 
       {/* Logout */}

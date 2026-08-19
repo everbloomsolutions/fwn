@@ -18,7 +18,7 @@ import { motion } from 'framer-motion';
 import { PUBLIC_ROUTES } from '@/shared/config/routes';
 import { brandConfig } from '@/shared/brand';
 import { CategoryHighlights } from '@/modules/shop/components/CategoryHighlights';
-import { SuggestedProducts } from '@/modules/shop/components/SuggestedProducts';
+import { BestSellers } from '@/modules/shop/components/BestSellers';
 
 export default function HomePage() {
   const stats = [
@@ -172,7 +172,7 @@ export default function HomePage() {
       <section className="bg-surface py-8 sm:py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <CategoryHighlights />
-          <SuggestedProducts title="Best Sellers" limit={4} />
+          <BestSellers limit={10} />
         </div>
       </section>
 

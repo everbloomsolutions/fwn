@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useToast } from '@/shared/ui';
+import { useToast, Text } from '@/shared/ui';
 import { useCartStore } from '@/modules/shop/stores/cartStore';
 import { PUBLIC_ROUTES } from '@/shared/config/routes';
 import { cn } from '@/shared/utils/cn';
@@ -129,6 +129,21 @@ export function ProductCard({ product }: { product: ProductCardProps }) {
           </button>
         ))}
       </div>
+
+      {variant && (
+        <Text
+          className={cn(
+            'mt-2 text-xs',
+            variant.stock === 0 ? 'text-status-error' : variant.stock <= 5 ? 'text-status-warning' : 'text-text-muted'
+          )}
+        >
+          {variant.stock === 0
+            ? 'Out of stock'
+            : variant.stock <= 5
+            ? `Only ${variant.stock} left`
+            : `${variant.stock} in stock`}
+        </Text>
+      )}
 
       <div className="mt-auto pt-3 flex items-center gap-2">
         {added ? (

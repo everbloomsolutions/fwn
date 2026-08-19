@@ -48,7 +48,15 @@ export const getOrders = async (
     if (!userId && !isAdmin) {
       throw new AppError('Authentication required', 401);
     }
-    const orders = await orderService.getOrders(userId, isAdmin);
+    const filters: orderService.GetOrdersFilters = {};
+    if (isAdmin) {
+      if (req.query.status) filters.status = req.query.status as orderService.GetOrdersFilters['status'];
+      if (req.query.paymentStatus) filters.paymentStatus = req.query.paymentStatus as orderService.GetOrdersFilters['paymentStatus'];
+      if (req.query.search) filters.search = req.query.search as string;
+      if (req.query.startDate) filters.startDate = new Date(req.query.startDate as string);
+      if (req.query.endDate) filters.endDate = new Date(req.query.endDate as string);
+    }
+    const orders = await orderService.getOrders(userId, isAdmin, filters);
     res.status(200).json({ success: true, data: orders });
   } catch (error) {
     next(error);

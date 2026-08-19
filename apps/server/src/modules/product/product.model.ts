@@ -28,6 +28,7 @@ export interface IProduct extends Document {
   tags: string[];
   isActive: boolean;
   isBestSeller: boolean;
+  salesCount: number;
   rating?: number;
   reviewCount?: number;
   nutrition?: Record<string, string>;
@@ -127,6 +128,11 @@ const productSchema = new Schema<IProduct>(
     isBestSeller: {
       type: Boolean,
       default: false,
+    },
+    salesCount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
     rating: {
       type: Number,

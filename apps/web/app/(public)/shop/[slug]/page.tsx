@@ -207,6 +207,21 @@ export default function ProductDetailPage() {
               ))}
           </div>
 
+          {variant && (
+            <Text
+              className={cn(
+                'mt-3 text-sm font-medium',
+                variant.stock === 0 ? 'text-status-error' : variant.stock <= 5 ? 'text-status-warning' : 'text-status-success'
+              )}
+            >
+              {variant.stock === 0
+                ? 'Out of stock'
+                : variant.stock <= 5
+                ? `Only ${variant.stock} left`
+                : `${variant.stock} in stock`}
+            </Text>
+          )}
+
           <Text className="mt-4 line-clamp-4 text-sm leading-relaxed text-text-muted sm:text-base sm:leading-relaxed">
             {product.description}
           </Text>
