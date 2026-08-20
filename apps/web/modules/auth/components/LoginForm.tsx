@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui';
 import { useAuth } from '../hooks/useAuth';
 import { login as loginService } from '../services/authService';
-import { loginSchema } from '../schemas/authSchema';
+import { loginSchema, type LoginFormData } from '../schemas/authSchema';
 import { OAuthButtons } from './OAuthButtons';
 import { PUBLIC_ROUTES, AUTH_ROUTES } from '@/shared/config/routes';
 import { motion } from 'framer-motion';
@@ -16,49 +16,27 @@ import { Mail, Lock, LogIn, ArrowRight } from 'lucide-react';
 export function LoginForm() {
   const router = useRouter();
   const { login: setAuth, setLoading, setError, clearError, error: authError } = useAuth();
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
     clearError();
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-    clearError();
-
+    setLoading(true);
     try {
-      const validated = loginSchema.parse(formData);
-      setIsSubmitting(true);
-      setLoading(true);
-
-      const response = await loginService(validated);
+      const response = await loginService(data);
       setAuth(response.user, response.token, response.refreshToken);
       router.push(PUBLIC_ROUTES.SERVICES);
     } catch (error) {
-      setIsSubmitting(false);
       setLoading(false);
-
-      if (error instanceof z.ZodError) {
-        const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) {
-            fieldErrors[err.path[0] as string] = err.message;
-          }
-        });
-        setErrors(fieldErrors);
-      } else {
-        const message =
-          error instanceof Error ? error.message : 'Login failed. Please try again.';
-        setError(message);
-      }
+      const message = error instanceof Error ? error.message : 'Login failed. Please try again.';
+      setError(message);
     }
   };
 
@@ -91,7 +69,7 @@ export function LoginForm() {
           </motion.div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -107,12 +85,10 @@ export function LoginForm() {
                   <input
                     type="email"
                     id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
                     autoComplete="email"
+                    disabled={isSubmitting}
                     className="flex h-10 w-full rounded-md border border-border bg-surface pl-10 pr-3 py-2 text-sm text-text ring-offset-surface placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    {...register('email')}
                   />
                 </div>
                 {errors.email && (
@@ -120,12 +96,12 @@ export function LoginForm() {
                     <svg className="h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
-                    <span>{errors.email}</span>
+                    <span>{errors.email.message}</span>
                   </p>
                 )}
               </div>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -141,12 +117,10 @@ export function LoginForm() {
                   <input
                     type="password"
                     id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
                     autoComplete="current-password"
+                    disabled={isSubmitting}
                     className="flex h-10 w-full rounded-md border border-border bg-surface pl-10 pr-3 py-2 text-sm text-text ring-offset-surface placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    {...register('password')}
                   />
                 </div>
                 {errors.password && (
@@ -154,7 +128,7 @@ export function LoginForm() {
                     <svg className="h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
-                    <span>{errors.password}</span>
+                    <span>{errors.password.message}</span>
                   </p>
                 )}
               </div>
@@ -186,9 +160,9 @@ export function LoginForm() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.5 }}
             >
-              <Button 
-                type="submit" 
-                className="w-full group" 
+              <Button
+                type="submit"
+                className="w-full group"
                 loading={isSubmitting}
                 size="lg"
               >
@@ -232,4 +206,3 @@ export function LoginForm() {
     </motion.div>
   );
 }
-
