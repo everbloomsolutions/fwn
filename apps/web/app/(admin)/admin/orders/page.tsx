@@ -117,9 +117,32 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
 
-              <div className="mb-4 text-sm text-text-muted">
-                {order.items.map((item) => `${item.quantity} × ${item.name} (${item.unit})`).join(', ')}
-              </div>
+              <details className="mb-4 group">
+                <summary className="cursor-pointer text-sm font-medium text-primary">
+                  View items & address
+                </summary>
+                <div className="mt-3 space-y-3 text-sm text-text-muted">
+                  <div>
+                    <span className="font-medium text-text">Items:</span>
+                    <ul className="mt-1 list-inside list-disc">
+                      {order.items.map((item, idx) => (
+                        <li key={idx}>
+                          {item.quantity} × {item.name} ({item.unit}) — ₹{item.price * item.quantity}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <span className="font-medium text-text">Shipping address:</span>
+                    <p>{order.shippingAddress.name}</p>
+                    <p>{order.shippingAddress.phone}</p>
+                    <p>
+                      {order.shippingAddress.address}, {order.shippingAddress.city},{' '}
+                      {order.shippingAddress.state} - {order.shippingAddress.pincode}
+                    </p>
+                  </div>
+                </div>
+              </details>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>

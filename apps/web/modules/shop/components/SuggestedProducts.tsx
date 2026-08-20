@@ -51,16 +51,21 @@ export function SuggestedProducts({
     async function load() {
       try {
         setLoading(true);
-        const url = categorySlug
-          ? `${API_ENDPOINTS.products.LIST}?category=${categorySlug}`
-          : API_ENDPOINTS.products.LIST;
+        const params = new URLSearchParams();
+        if (categorySlug) {
+          params.set('category', categorySlug);
+        }
+        params.set('sort', 'best_selling');
+        params.set('limit', '20');
         const response = await apiRequest<ProductResponse>({
           method: 'GET',
-          url,
+          url: `${API_ENDPOINTS.products.LIST}?${params.toString()}`,
         });
-        const list = response.data.filter((p) => !excludeIds.includes(p._id) && (!categoryId || p.variants.some((v) => v.stock > 0)));
-        const shuffled = list.sort(() => 0.5 - Math.random()).slice(0, limit);
-        setProducts(shuffled);
+        const list = response.data
+          .filter((p) => !excludeIds.includes(p._id) && (!categoryId || p.variants.some((v) => v.stock > 0)))
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+          .slice(0, limit);
+        setProducts(list);
       } catch {
         // ignore
       } finally {

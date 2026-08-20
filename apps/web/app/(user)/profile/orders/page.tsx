@@ -107,9 +107,12 @@ export default function MyOrdersPage() {
 
               <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
                 <Text className="font-medium">Total: ₹{order.total}</Text>
-                <Text className="text-sm text-text-muted">
-                  {order.shippingAddress.city}, {order.shippingAddress.state}
-                </Text>
+                <Link
+                  href={`/profile/orders/${order._id}`}
+                  className="text-sm font-medium text-primary hover:text-primary-hover"
+                >
+                  View details →
+                </Link>
               </div>
             </div>
           ))}

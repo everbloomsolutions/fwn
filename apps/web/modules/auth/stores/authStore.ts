@@ -19,7 +19,7 @@ export interface User {
   onboardingCompletedAt?: string;
   phoneNumber?: string;
   company?: string;
-  preferences?: Record<string, any>;
+  preferences?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }

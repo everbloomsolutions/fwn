@@ -73,6 +73,7 @@ async function findOrCreateGuestUser(shippingAddress: IOrder['shippingAddress'])
 export const createOrder = async (data: CreateOrderData): Promise<IOrder> => {
   let subtotal = 0;
   const populatedItems: IOrderItem[] = [];
+  const isCod = data.paymentMethod === 'cod';
 
   for (const item of data.items) {
     const product = await Product.findById(item.product);
@@ -92,7 +93,9 @@ export const createOrder = async (data: CreateOrderData): Promise<IOrder> => {
         if (variant.stock < item.quantity) {
           throw new Error(`Insufficient stock for ${product.name} - ${variant.unit}`);
         }
-        variant.stock -= item.quantity;
+        if (isCod) {
+          variant.stock -= item.quantity;
+        }
       } else {
         throw new Error(`Variant not found for ${product.name}`);
       }
@@ -100,10 +103,14 @@ export const createOrder = async (data: CreateOrderData): Promise<IOrder> => {
       if (product.stock < item.quantity) {
         throw new Error(`Insufficient stock for ${product.name}`);
       }
-      product.stock -= item.quantity;
+      if (isCod) {
+        product.stock -= item.quantity;
+      }
     }
 
-    await product.save();
+    if (isCod) {
+      await product.save();
+    }
 
     populatedItems.push({
       product: product._id as mongoose.Types.ObjectId,
@@ -146,6 +153,7 @@ export const createOrder = async (data: CreateOrderData): Promise<IOrder> => {
     tax,
     total,
     paymentMethod: data.paymentMethod,
+    stockDeducted: isCod,
     shippingAddress: data.shippingAddress,
     deliveryNotes: data.deliveryNotes,
     razorpayOrderId,
@@ -156,13 +164,15 @@ export const createOrder = async (data: CreateOrderData): Promise<IOrder> => {
 
   const savedOrder = await order.save();
 
-  // Update sales counts and best-seller flags
-  await Promise.all(
-    populatedItems.map((item) =>
-      Product.updateOne({ _id: item.product }, { $inc: { salesCount: item.quantity } })
-    )
-  );
-  await updateTopBestSellers().catch((err) => logger.warn('Failed to update best sellers:', err));
+  // Update sales counts and best-seller flags only for confirmed (COD) orders
+  if (isCod) {
+    await Promise.all(
+      populatedItems.map((item) =>
+        Product.updateOne({ _id: item.product }, { $inc: { salesCount: item.quantity } })
+      )
+    );
+    updateTopBestSellers().catch((err) => logger.warn('Failed to update best sellers:', err));
+  }
 
   return savedOrder;
 };
@@ -241,7 +251,30 @@ export const updateOrderStatus = async (
   }
 
   const order = await Order.findByIdAndUpdate(id, { $set: data }, { new: true }).exec();
-  if (order && data.status === 'cancelled') {
+  if (!order) return null;
+
+  // Deduct stock when an online order is paid
+  if (data.status === 'paid' && !order.stockDeducted) {
+    for (const item of order.items) {
+      const product = await Product.findById(item.product);
+      if (!product) continue;
+      const variant = product.variants.find((v) => v._id.toString() === item.variant?.toString());
+      if (variant) {
+        variant.stock -= item.quantity;
+      } else {
+        product.stock -= item.quantity;
+      }
+      product.stock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+      product.salesCount += item.quantity;
+      await product.save();
+    }
+    order.stockDeducted = true;
+    await order.save();
+    updateTopBestSellers().catch((err) => logger.warn('Failed to update best sellers:', err));
+  }
+
+  // Restore stock and sales count when an order is cancelled
+  if (data.status === 'cancelled' && order.stockDeducted) {
     for (const item of order.items) {
       const product = await Product.findById(item.product);
       if (!product) continue;
@@ -255,7 +288,10 @@ export const updateOrderStatus = async (
       product.salesCount = Math.max(0, product.salesCount - item.quantity);
       await product.save();
     }
-    await updateTopBestSellers().catch((err) => logger.warn('Failed to update best sellers:', err));
+    order.stockDeducted = false;
+    await order.save();
+    updateTopBestSellers().catch((err) => logger.warn('Failed to update best sellers:', err));
   }
+
   return order;
 };

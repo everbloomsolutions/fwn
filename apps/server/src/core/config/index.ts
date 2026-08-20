@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
-// Note: Logger is imported after config initialization to avoid circular dependency
-// Import will be done conditionally after logger is available
+import { logger } from '../middleware/logger';
 
 // Use process.cwd() for consistent path resolution
 const cwd = process.cwd();
@@ -22,13 +21,13 @@ if (nodeEnv === 'production') {
   const prodResult = dotenv.config({ path: rootEnvProdPath });
   if (!prodResult.error && prodResult.parsed) {
     rootLoaded = true;
-    console.log('✅ Loaded root .env.production from:', rootEnvProdPath);
+    logger.info('✅ Loaded root .env.production from:', rootEnvProdPath);
   }
 } else {
   const devResult = dotenv.config({ path: rootEnvDevPath });
   if (!devResult.error && devResult.parsed) {
     rootLoaded = true;
-    console.log('✅ Loaded root .env.development from:', rootEnvDevPath);
+    logger.info('✅ Loaded root .env.development from:', rootEnvDevPath);
   }
 }
 
@@ -36,32 +35,32 @@ if (nodeEnv === 'production') {
 const rootResult = dotenv.config({ path: rootEnvPath });
 if (!rootResult.error && rootResult.parsed) {
   rootLoaded = true;
-  console.log('✅ Loaded root .env from:', rootEnvPath);
+  logger.info('✅ Loaded root .env from:', rootEnvPath);
 }
 
 // Load server .env (final override, highest priority)
 const serverResult = dotenv.config({ path: serverEnvPath });
 if (!serverResult.error && serverResult.parsed) {
-  console.log('✅ Loaded server .env from:', serverEnvPath);
+  logger.info('✅ Loaded server .env from:', serverEnvPath);
 }
 
 // Load root .env.local (higher priority than .env)
 const rootEnvLocalPath = path.resolve(rootDir, '.env.local');
 const rootEnvLocalResult = dotenv.config({ path: rootEnvLocalPath });
 if (!rootEnvLocalResult.error && rootEnvLocalResult.parsed) {
-  console.log('✅ Loaded root .env.local from:', rootEnvLocalPath);
+  logger.info('✅ Loaded root .env.local from:', rootEnvLocalPath);
 }
 
 // Load server .env.local (highest priority, final override)
 const serverEnvLocalPath = path.resolve(cwd, '.env.local');
 const serverEnvLocalResult = dotenv.config({ path: serverEnvLocalPath });
 if (!serverEnvLocalResult.error && serverEnvLocalResult.parsed) {
-  console.log('✅ Loaded server .env.local from:', serverEnvLocalPath);
+  logger.info('✅ Loaded server .env.local from:', serverEnvLocalPath);
 }
 
 if (!rootLoaded) {
-  console.log('⚠️  Could not load root .env file. Tried:', rootEnvDevPath, rootEnvProdPath, rootEnvPath);
-  console.log('⚠️  Using dotenv-cli to load env files is recommended.');
+  logger.info('⚠️  Could not load root .env file. Tried:', rootEnvDevPath, rootEnvProdPath, rootEnvPath);
+  logger.info('⚠️  Using dotenv-cli to load env files is recommended.');
 }
 
 interface Config {
@@ -126,7 +125,7 @@ export const config: Config = {
       ? (() => {
           // Redis is optional - if not provided in production, return empty string
           // The Redis client should handle this gracefully
-          console.warn('⚠️  REDIS_URL not set in production. Redis features will be disabled.');
+          logger.warn('⚠️  REDIS_URL not set in production. Redis features will be disabled.');
           return '';
         })()
       : 'redis://localhost:6379'),

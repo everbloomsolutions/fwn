@@ -24,6 +24,7 @@ export interface IOrder extends Document {
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   paymentMethod: PaymentMethod;
+  stockDeducted: boolean;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
   shippingAddress: {
@@ -101,6 +102,10 @@ const orderSchema = new Schema<IOrder>(
       type: String,
       enum: ['cod', 'razorpay', 'upi'],
       required: true,
+    },
+    stockDeducted: {
+      type: Boolean,
+      default: false,
     },
     razorpayOrderId: {
       type: String,

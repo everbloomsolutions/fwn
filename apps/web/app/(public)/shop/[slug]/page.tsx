@@ -309,6 +309,7 @@ export default function ProductDetailPage() {
       <SuggestedProducts
         title="You may also like"
         categoryId={product.category._id}
+        categorySlug={product.category.slug}
         excludeIds={[product._id]}
         limit={4}
       />

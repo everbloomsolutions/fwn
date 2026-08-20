@@ -129,13 +129,18 @@ export const assignCartToUser = async (guestId: string, userId: string): Promise
 
   const userCart = await getOrCreateCart(userId);
   for (const guestItem of guestCart.items) {
+    const product = await Product.findById(guestItem.product);
+    const variant = product?.variants.find((v) => v._id.toString() === guestItem.variant.toString());
+    const maxStock = variant ? variant.stock : product?.stock || 0;
+    if (maxStock <= 0) continue;
+
     const existing = userCart.items.find(
       (i) => i.product.toString() === guestItem.product.toString() && i.variant.toString() === guestItem.variant.toString()
     );
     if (existing) {
-      existing.quantity += guestItem.quantity;
+      existing.quantity = Math.min(existing.quantity + guestItem.quantity, maxStock);
     } else {
-      userCart.items.push(guestItem);
+      userCart.items.push({ ...guestItem, quantity: Math.min(guestItem.quantity, maxStock) });
     }
   }
 
