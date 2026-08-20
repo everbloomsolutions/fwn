@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
@@ -9,6 +8,7 @@ import { PageHeader } from '@/shared/ui/layout';
 import { SkeletonCard } from '@/shared/ui/feedback/Skeleton';
 import { DataTable } from '@/modules/admin/components/DataTable';
 import { DataCard } from '@/modules/admin/components/DataCard';
+import { useApi } from '@/shared/hooks';
 import { Plus } from 'lucide-react';
 
 interface Category {
@@ -24,29 +24,14 @@ interface CategoryResponse {
 }
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  async function load() {
-    try {
-      const res = await apiRequest<CategoryResponse>({ method: 'GET', url: API_ENDPOINTS.categories.LIST });
-      setCategories(res.data || []);
-    } catch {
-      setCategories([]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
+  const { data, isLoading, mutate } = useApi<CategoryResponse>(API_ENDPOINTS.categories.LIST);
+  const categories = data?.data || [];
 
   const deleteCategory = async (id: string) => {
     if (!confirm('Delete this category?')) return;
     try {
       await apiRequest({ method: 'DELETE', url: `${API_ENDPOINTS.categories.LIST}/${id}` });
-      load();
+      await mutate();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete');
     }
@@ -86,7 +71,7 @@ export default function AdminCategoriesPage() {
         }
       />
 
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-3">
           <SkeletonCard />
           <SkeletonCard />

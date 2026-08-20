@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Text } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/layout';
+import { useApi, useDebounce } from '@/shared/hooks';
 import { Loader2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
@@ -43,48 +44,33 @@ interface OrdersResponse {
 const STATUSES: OrderStatus[] = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
 const PAYMENT_STATUSES: PaymentStatus[] = ['pending', 'completed', 'failed', 'refunded'];
 
+function buildOrdersUrl(page: number, search: string, status: OrderStatus | '', paymentStatus: PaymentStatus | ''): string {
+  const params = new URLSearchParams();
+  params.set('page', page.toString());
+  params.set('limit', '20');
+  if (search.trim()) params.set('search', search.trim());
+  if (status) params.set('status', status);
+  if (paymentStatus) params.set('paymentStatus', paymentStatus);
+  return `${API_ENDPOINTS.orders.LIST}?${params.toString()}`;
+}
+
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<Record<string, boolean>>({});
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<OrderStatus | ''>('');
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | ''>('');
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState<OrdersResponse['pagination']>({ total: 0, page: 1, limit: 20, totalPages: 1 });
-
-  const loadOrders = useCallback(async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      params.set('page', page.toString());
-      params.set('limit', '20');
-      if (search.trim()) params.set('search', search.trim());
-      if (status) params.set('status', status);
-      if (paymentStatus) params.set('paymentStatus', paymentStatus);
-      const res = await apiRequest<OrdersResponse>({
-        method: 'GET',
-        url: `${API_ENDPOINTS.orders.LIST}?${params.toString()}`,
-      });
-      setOrders(res.data || []);
-      setPagination(res.pagination || { total: 0, page: 1, limit: 20, totalPages: 1 });
-    } catch {
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, status, paymentStatus, page]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
+    setPage(1);
   }, [search, status, paymentStatus]);
 
-  useEffect(() => {
-    loadOrders();
-  }, [loadOrders]);
+  const debouncedSearch = useDebounce(search, 300);
+  const ordersUrl = buildOrdersUrl(page, debouncedSearch, status, paymentStatus);
+
+  const { data, isLoading, mutate } = useApi<OrdersResponse>(ordersUrl);
+  const orders = data?.data || [];
+  const pagination = data?.pagination || { total: 0, page: 1, limit: 20, totalPages: 1 };
 
   const updateOrder = async (id: string, data: { status?: OrderStatus; paymentStatus?: PaymentStatus }) => {
     setUpdating((prev) => ({ ...prev, [id]: true }));
@@ -94,7 +80,7 @@ export default function AdminOrdersPage() {
         url: `${API_ENDPOINTS.orders.LIST}/${id}`,
         data,
       });
-      await loadOrders();
+      await mutate();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to update order');
     } finally {
@@ -145,7 +131,7 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>

@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Heading, Text, Button } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/layout';
+import { useApi, useDebounce } from '@/shared/hooks';
 import { Loader2, Search, ChevronLeft, ChevronRight, AlertTriangle, Plus, Minus, Pencil } from 'lucide-react';
 
 interface Variant {
@@ -47,63 +48,42 @@ interface CategoryResponse {
   data: Category[];
 }
 
+function buildProductsUrl(page: number, search: string, category: string, lowStock: boolean, activeFilter: 'all' | 'active' | 'inactive'): string {
+  const params = new URLSearchParams();
+  params.set('page', page.toString());
+  params.set('limit', '20');
+  if (search.trim()) params.set('search', search.trim());
+  if (category) params.set('category', category);
+  if (lowStock) params.set('inStock', 'true');
+  if (activeFilter !== 'all') params.set('active', activeFilter === 'active' ? 'true' : 'false');
+  return `${API_ENDPOINTS.products.LIST}?${params.toString()}`;
+}
+
 export default function AdminInventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [lowStock, setLowStock] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState<ProductResponse['pagination']>({ total: 0, page: 1, limit: 20, totalPages: 1 });
 
   useEffect(() => {
-    async function loadCategories() {
-      try {
-        const res = await apiRequest<CategoryResponse>({ method: 'GET', url: API_ENDPOINTS.categories.LIST });
-        setCategories(res.data || []);
-      } catch {
-        setCategories([]);
-      }
-    }
-    loadCategories();
-  }, []);
-
-  const loadProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      params.set('page', page.toString());
-      params.set('limit', '20');
-      if (search.trim()) params.set('search', search.trim());
-      if (category) params.set('category', category);
-      if (lowStock) params.set('inStock', 'true');
-      if (activeFilter !== 'all') params.set('active', activeFilter === 'active' ? 'true' : 'false');
-      const res = await apiRequest<ProductResponse>({
-        method: 'GET',
-        url: `${API_ENDPOINTS.products.LIST}?${params.toString()}`,
-      });
-      setProducts(res.data || []);
-      setPagination(res.pagination || { total: 0, page: 1, limit: 20, totalPages: 1 });
-    } catch {
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, category, lowStock, activeFilter, page]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
+    setPage(1);
   }, [search, category, lowStock, activeFilter]);
 
+  const debouncedSearch = useDebounce(search, 300);
+  const productsUrl = buildProductsUrl(page, debouncedSearch, category, lowStock, activeFilter);
+
+  const { data: productsData, isLoading, mutate } = useApi<ProductResponse>(productsUrl);
+  const { data: categoriesData } = useApi<CategoryResponse>(API_ENDPOINTS.categories.LIST);
+
   useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
+    setProducts(productsData?.data || []);
+  }, [productsData]);
+
+  const categories = categoriesData?.data || [];
+  const pagination = productsData?.pagination || { total: 0, page: 1, limit: 20, totalPages: 1 };
 
   const isLowStock = (p: Product) =>
     p.variants.some((v) => v.isActive !== false && v.stock > 0 && v.stock < 10) ||
@@ -138,6 +118,7 @@ export default function AdminInventoryPage() {
           })),
         },
       });
+      await mutate();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to update inventory');
     } finally {
@@ -212,7 +193,7 @@ export default function AdminInventoryPage() {
         </div>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
