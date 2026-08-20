@@ -116,7 +116,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 <span className="text-text-muted">Progress</span>
                 <span className="font-medium">{project.progress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-bg-muted rounded-full h-2">
                 <div
                   className="bg-primary h-2 rounded-full transition-all"
                   style={{ width: `${project.progress}%` }}

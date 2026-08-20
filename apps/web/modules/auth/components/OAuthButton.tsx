@@ -24,7 +24,7 @@ const providerIcons: Record<OAuthProvider, typeof Chrome> = {
 };
 
 const providerColors: Record<OAuthProvider, string> = {
-  google: 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500',
+  google: 'bg-surface text-text border-border hover:bg-surface-hover hover:border-border',
   facebook: 'bg-[#1877F2] text-white hover:bg-[#166FE5] border-[#1877F2] hover:border-[#166FE5]',
   linkedin: 'bg-[#0077B5] text-white hover:bg-[#006399] border-[#0077B5] hover:border-[#006399]',
 };

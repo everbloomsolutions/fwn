@@ -169,7 +169,7 @@ export function HeroSection({
 
   const overlayClasses = {
     dark: 'bg-black',
-    light: 'bg-white',
+    light: 'bg-surface',
     gradient: 'bg-gradient-to-b from-black/80 via-black/60 to-black/80',
     none: '',
   };
@@ -292,7 +292,7 @@ export function HeroSection({
                   className={cn(
                     'h-2 rounded-full transition-all',
                     index === currentImageIndex
-                      ? 'w-8 bg-white'
+                      ? 'w-8 bg-surface'
                       : 'w-2 bg-white/50 hover:bg-white/75'
                   )}
                   aria-label={`Go to image ${index + 1}`}
@@ -387,7 +387,7 @@ export function HeroSection({
                       className={cn(
                         isImageOrVideo && 'shadow-lg',
                         isImageOrVideo && isOutline && 'border-white/30 text-white hover:bg-white/10 hover:border-white/50 bg-white/5 backdrop-blur-sm',
-                        isImageOrVideo && !isOutline && 'bg-white/90 text-gray-900 hover:bg-white'
+                        isImageOrVideo && !isOutline && 'bg-white/90 text-text hover:bg-surface'
                       )}
                     >
                       {action.label}

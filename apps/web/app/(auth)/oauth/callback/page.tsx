@@ -91,12 +91,12 @@ export default function OAuthCallbackPage() {
         {error ? (
           <>
             <div className="mb-4 text-red-600">Error: {error}</div>
-            <p className="text-gray-600">Redirecting to login...</p>
+            <p className="text-text-muted">Redirecting to login...</p>
           </>
         ) : (
           <>
             <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-            <p className="text-gray-600">Completing authentication...</p>
+            <p className="text-text-muted">Completing authentication...</p>
           </>
         )}
       </div>

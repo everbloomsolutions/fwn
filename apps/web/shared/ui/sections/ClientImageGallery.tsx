@@ -58,17 +58,17 @@ export function ClientImageGallery({
     <div
       className={cn(
         'w-full max-w-full overflow-hidden transition-all duration-500 ease-in-out',
-        'border border-gray-200 rounded-lg bg-white shadow-md',
+        'border border-border rounded-lg bg-surface shadow-md',
         className
       )}
       {...props}
     >
       {/* Header with Close Button */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <h3 className="text-lg font-semibold text-text">Image Gallery</h3>
         <button
           onClick={onClose}
-          className="p-1 rounded hover:bg-gray-100 transition-colors"
+          className="p-1 rounded hover:bg-bg-muted transition-colors"
           aria-label="Close gallery"
         >
           <X className="h-5 w-5 text-text-muted" />
@@ -76,10 +76,10 @@ export function ClientImageGallery({
       </div>
 
       {/* Main Expanded Image */}
-      <div className="relative w-full aspect-video bg-gray-50">
+      <div className="relative w-full aspect-video bg-bg-muted">
         <button
           onClick={handlePrevious}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/90 hover:bg-white shadow-md transition-colors"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/90 hover:bg-surface shadow-md transition-colors"
           aria-label="Previous image"
         >
           <ChevronLeft className="h-5 w-5 text-text" />
@@ -98,7 +98,7 @@ export function ClientImageGallery({
 
         <button
           onClick={handleNext}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/90 hover:bg-white shadow-md transition-colors"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/90 hover:bg-surface shadow-md transition-colors"
           aria-label="Next image"
         >
           <ChevronRight className="h-5 w-5 text-text" />
@@ -111,7 +111,7 @@ export function ClientImageGallery({
       </div>
 
       {/* Thumbnail Strip */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-border">
         <div className="flex gap-2 overflow-x-auto">
           {images.map((image, index) => (
             <button
@@ -121,7 +121,7 @@ export function ClientImageGallery({
                 'relative flex-shrink-0 w-20 h-20 rounded overflow-hidden border-2 transition-all',
                 index === currentIndex
                   ? 'border-primary scale-105'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-border hover:border-border'
               )}
             >
               <Image

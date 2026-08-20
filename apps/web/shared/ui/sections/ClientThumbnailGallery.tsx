@@ -101,7 +101,7 @@ export function ClientThumbnailGallery({
               variant="ghost"
               size="sm"
               onClick={handleCloseExpand}
-              className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+              className="bg-white/90 hover:bg-surface h-8 w-8 p-0"
               aria-label="Close expanded view"
             >
               <Maximize2 className="h-4 w-4" />
@@ -111,7 +111,7 @@ export function ClientThumbnailGallery({
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+                className="bg-white/90 hover:bg-surface h-8 w-8 p-0"
                 aria-label="Close gallery"
               >
                 <X className="h-4 w-4" />
@@ -165,7 +165,7 @@ export function ClientThumbnailGallery({
       </div>
 
       {/* Cycling Image */}
-      <div className="relative h-[240px] sm:h-[280px] bg-gray-50">
+      <div className="relative h-[240px] sm:h-[280px] bg-bg-muted">
         {currentImage && (
           <Image
             src={currentImage}

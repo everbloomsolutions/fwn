@@ -59,7 +59,7 @@ export function ClientCard({
         'h-[300px] lg:h-[350px]',
         isActive
           ? 'shadow-lg border-2 border-primary'
-          : 'shadow-md border border-gray-200',
+          : 'shadow-md border border-border',
         className
       )}
       {...props}

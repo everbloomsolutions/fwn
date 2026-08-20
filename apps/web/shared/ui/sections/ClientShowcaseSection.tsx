@@ -162,7 +162,7 @@ export function ClientShowcaseSection({
             {/* Client Name and Location Overlay on Map */}
             {selectedClient && (
               <div className="absolute top-4 left-4 right-4 z-10">
-                <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4 border border-gray-200 max-w-md">
+                <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4 border border-border max-w-md">
                   <h3 className="text-2xl font-bold text-text mb-1">
                     {selectedClient.name}
                   </h3>

@@ -72,7 +72,7 @@ export default function TestApiPage() {
       )}
 
       {result && (
-        <div className="rounded bg-gray-100 p-4">
+        <div className="rounded bg-bg-muted p-4">
           <h3 className="mb-2 font-bold">Response:</h3>
           <pre className="overflow-auto text-sm">{result}</pre>
         </div>

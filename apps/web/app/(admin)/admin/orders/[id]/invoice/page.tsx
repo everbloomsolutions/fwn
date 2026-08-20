@@ -61,7 +61,7 @@ export default function AdminOrderInvoicePage() {
         ]}
         className="mb-4"
       />
-      <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-white p-8 shadow-sm print:shadow-none print:border-none">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-surface p-8 shadow-sm print:shadow-none print:border-none">
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <Heading level="h1" size="compact" balance className="text-2xl">
