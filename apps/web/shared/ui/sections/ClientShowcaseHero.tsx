@@ -2,12 +2,14 @@
 
 import { HTMLAttributes, useState } from 'react';
 import { Client } from '@/shared/types/client.types';
-import { MapboxMap } from '@/shared/ui/maps/MapboxMap';
+import dynamic from 'next/dynamic';
 import { ClientCarousel } from './ClientCarousel';
 import { ClientImageGallery } from './ClientImageGallery';
 import { Container, Heading, Text } from '@/shared/ui';
 import { cn } from '@/shared/utils/cn';
 import { DEFAULT_MAP_STYLE, type MapboxStyle } from '@/shared/config/mapbox';
+
+const MapboxMap = dynamic(() => import('@/shared/ui/maps/MapboxMap').then((m) => m.MapboxMap), { ssr: false });
 
 export interface ClientShowcaseHeroProps extends HTMLAttributes<HTMLElement> {
   clients: Client[];

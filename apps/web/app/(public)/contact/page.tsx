@@ -2,7 +2,10 @@
 
 import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Container, Card, CardContent, CardHeader, CardTitle, ContactFormSection, Heading, Text, BackToTop, OfficeLocationMap } from '@/shared/ui';
+import dynamic from 'next/dynamic';
+import { Container, Card, CardContent, CardHeader, CardTitle, ContactFormSection, Heading, Text, BackToTop } from '@/shared/ui';
+
+const OfficeLocationMap = dynamic(() => import('@/shared/ui/maps/OfficeLocationMap').then((m) => m.OfficeLocationMap), { ssr: false });
 import { Mail, Phone, MapPin, Clock, MessageSquare } from 'lucide-react';
 import { submitContactForm } from '@/modules/contact/services/contactService';
 import type { ContactFormData } from '@/shared/ui/sections/ContactFormSection';

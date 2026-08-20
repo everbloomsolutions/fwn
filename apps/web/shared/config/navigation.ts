@@ -31,7 +31,7 @@ export const navigationConfig: NavigationItem[] = [
 export const navbarNavigationLinks = [
   { href: PUBLIC_ROUTES.HOME, label: 'Home' },
   { href: PUBLIC_ROUTES.ABOUT, label: 'About Us' },
-  { href: PUBLIC_ROUTES.SHOP, label: 'Shop' },
+  { href: PUBLIC_ROUTES.SHOP, label: 'Shop by Category' },
   { href: PUBLIC_ROUTES.CART, label: 'Cart' },
   { href: PUBLIC_ROUTES.CONTACT, label: 'Contact Us' },
 ] as const;
