@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { apiRequest } from '@/shared/core/http/apiClient';
+import { API_ENDPOINTS } from '@/shared/config/api';
 
 export interface CartItem {
   _id: string;
@@ -71,7 +72,7 @@ export const useCartStore = create<CartState>()(
       loadCart: async () => {
         try {
           set({ isLoading: true, error: null });
-          const response = await apiRequest<{ data: ApiCart }>({ method: 'get', url: '/cart' });
+          const response = await apiRequest<{ data: ApiCart }>({ method: 'get', url: API_ENDPOINTS.cart.GET });
           const cart = response.data;
           set({ items: mapCartItems(cart), isLoading: false });
         } catch (error) {
@@ -84,7 +85,7 @@ export const useCartStore = create<CartState>()(
           set({ isLoading: true, error: null });
           const response = await apiRequest<{ data: ApiCart }>({
             method: 'post',
-            url: '/cart/items',
+            url: API_ENDPOINTS.cart.ADD_ITEM,
             data: { productId, variantId, quantity },
           });
           const cart = response.data;
@@ -99,7 +100,7 @@ export const useCartStore = create<CartState>()(
           set({ isLoading: true, error: null });
           const response = await apiRequest<{ data: ApiCart }>({
             method: 'patch',
-            url: `/cart/items/${variantId}`,
+            url: API_ENDPOINTS.cart.UPDATE_ITEM(variantId),
             data: { quantity },
           });
           const cart = response.data;
@@ -114,7 +115,7 @@ export const useCartStore = create<CartState>()(
           set({ isLoading: true, error: null });
           const response = await apiRequest<{ data: ApiCart }>({
             method: 'delete',
-            url: `/cart/items/${variantId}`,
+            url: API_ENDPOINTS.cart.REMOVE_ITEM(variantId),
           });
           const cart = response.data;
           set({ items: mapCartItems(cart), isLoading: false });
@@ -126,7 +127,7 @@ export const useCartStore = create<CartState>()(
       clearCart: async () => {
         try {
           set({ isLoading: true, error: null });
-          await apiRequest({ method: 'delete', url: '/cart' });
+          await apiRequest({ method: 'delete', url: API_ENDPOINTS.cart.CLEAR });
           set({ items: [], isLoading: false });
         } catch (error) {
           set({ isLoading: false, error: error instanceof Error ? error.message : 'Failed to clear cart' });
