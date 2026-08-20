@@ -29,13 +29,17 @@ interface BestSellersProps {
 }
 
 async function getBestSellers(limit: number): Promise<Product[]> {
-  const res = await fetch(
-    `${getEnv().NEXT_PUBLIC_API_URL}${API_ENDPOINTS.products.LIST}?isBestSeller=true&sort=best_selling&limit=${limit}`,
-    { cache: 'no-store' }
-  );
-  if (!res.ok) return [];
-  const json = await res.json();
-  return json?.data || [];
+  try {
+    const res = await fetch(
+      `${getEnv().NEXT_PUBLIC_API_URL}${API_ENDPOINTS.products.LIST}?isBestSeller=true&sort=best_selling&limit=${limit}`,
+      { cache: 'no-store' }
+    );
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json?.data || [];
+  } catch {
+    return [];
+  }
 }
 
 export async function BestSellers({ limit = 10 }: BestSellersProps) {

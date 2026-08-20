@@ -260,12 +260,18 @@ export const updateOrderStatus = async (
       if (!product) continue;
       const variant = product.variants.find((v) => v._id.toString() === item.variant?.toString());
       if (variant) {
+        if (variant.stock < item.quantity) {
+          throw new Error(`Insufficient stock for ${product.name} - ${variant.unit}`);
+        }
         variant.stock -= item.quantity;
       } else {
+        if (product.stock < item.quantity) {
+          throw new Error(`Insufficient stock for ${product.name}`);
+        }
         product.stock -= item.quantity;
       }
       product.stock = product.variants.reduce((sum, v) => sum + v.stock, 0);
-      product.salesCount += item.quantity;
+      product.salesCount = (product.salesCount || 0) + item.quantity;
       await product.save();
     }
     order.stockDeducted = true;
@@ -285,7 +291,7 @@ export const updateOrderStatus = async (
         product.stock += item.quantity;
       }
       product.stock = product.variants.reduce((sum, v) => sum + v.stock, 0);
-      product.salesCount = Math.max(0, product.salesCount - item.quantity);
+      product.salesCount = Math.max(0, (product.salesCount || 0) - item.quantity);
       await product.save();
     }
     order.stockDeducted = false;

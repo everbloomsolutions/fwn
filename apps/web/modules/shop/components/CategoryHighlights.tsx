@@ -22,12 +22,16 @@ const categoryImages: Record<string, string> = {
 };
 
 async function getCategories(): Promise<Category[]> {
-  const res = await fetch(`${getEnv().NEXT_PUBLIC_API_URL}${API_ENDPOINTS.categories.LIST}`, {
-    cache: 'no-store',
-  });
-  if (!res.ok) return [];
-  const json = await res.json();
-  return json?.data || [];
+  try {
+    const res = await fetch(`${getEnv().NEXT_PUBLIC_API_URL}${API_ENDPOINTS.categories.LIST}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json?.data || [];
+  } catch {
+    return [];
+  }
 }
 
 export async function CategoryHighlights() {
