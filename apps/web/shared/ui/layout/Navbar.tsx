@@ -24,7 +24,7 @@ import { Logo } from '@/shared/ui/brand';
 import { USER_ROUTES, AUTH_ROUTES, PUBLIC_ROUTES } from '@/shared/config/routes';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { apiRequest } from '@/shared/core/http/apiClient';
-import { ShoppingCart, ChevronDown, Grid3X3 } from 'lucide-react';
+import { ShoppingCart, ChevronDown, Grid3X3, Shield, Package, ClipboardList, Tags, PlusSquare } from 'lucide-react';
 
 interface Category {
   _id: string;
@@ -33,12 +33,14 @@ interface Category {
 }
 
 export function Navbar() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const pathname = usePathname();
+  const isAdmin = user?.role === 'admin';
   const totalItems = useCartStore((state) => state.totalItems);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const authPage = isAuthPage(pathname);
@@ -90,6 +92,15 @@ export function Navbar() {
     href: `/shop?category=${c.slug}`,
     label: c.name,
   }));
+
+  const adminMobileLinks = isAdmin
+    ? [
+        { href: '/admin/inventory', label: 'Inventory' },
+        { href: '/admin/orders', label: 'Orders' },
+        { href: '/admin/categories', label: 'Categories' },
+        { href: '/admin/products/new', label: 'Add Product' },
+      ]
+    : [];
 
   return (
     <>
@@ -166,6 +177,61 @@ export function Navbar() {
                     </Link>
                   );
                 })}
+
+                {isAdmin && (
+                  <div
+                    className="relative"
+                    onMouseEnter={() => {
+                      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                      setAdminOpen(true);
+                    }}
+                    onMouseLeave={() => {
+                      timeoutRef.current = setTimeout(() => setAdminOpen(false), 150);
+                    }}
+                  >
+                    <button
+                      onClick={() => setAdminOpen((v) => !v)}
+                      className={cn(
+                        'inline-flex items-center gap-1 rounded-lg px-4 py-2 text-base font-medium transition',
+                        pathname.startsWith('/admin')
+                          ? 'text-primary'
+                          : 'text-text-muted hover:text-text'
+                      )}
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>Admin</span>
+                      <ChevronDown className={cn('h-4 w-4 transition', adminOpen && 'rotate-180')} />
+                    </button>
+                    {adminOpen && (
+                      <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-surface p-2 shadow-xl">
+                        <Link
+                          href="/admin/inventory"
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+                        >
+                          <Package className="h-4 w-4" /> Inventory
+                        </Link>
+                        <Link
+                          href="/admin/orders"
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+                        >
+                          <ClipboardList className="h-4 w-4" /> Orders
+                        </Link>
+                        <Link
+                          href="/admin/categories"
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+                        >
+                          <Tags className="h-4 w-4" /> Categories
+                        </Link>
+                        <Link
+                          href="/admin/products/new"
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+                        >
+                          <PlusSquare className="h-4 w-4" /> Add Product
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
               </nav>
             )}
 
@@ -209,6 +275,7 @@ export function Navbar() {
                   links={[
                     ...navbarNavigationLinks,
                     ...mobileCategoryLinks,
+                    ...adminMobileLinks,
                   ]}
                   authLinks={authLinks}
                 />
