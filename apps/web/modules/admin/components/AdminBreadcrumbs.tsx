@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 
-interface Crumb {
+export interface Crumb {
   label: string;
   href?: string;
 }

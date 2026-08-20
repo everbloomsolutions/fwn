@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Heading, Text, Button } from '@/shared/ui';
-import { AdminBreadcrumbs } from '@/modules/admin/components/AdminBreadcrumbs';
+import { PageHeader } from '@/shared/ui/layout';
 import { Loader2, Search, Pencil, Trash2, Plus } from 'lucide-react';
 
 interface Product {
@@ -84,24 +84,20 @@ export default function AdminProductsPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[{ label: 'Products' }]}
-        className="mb-4"
+      <PageHeader
+        title="Products"
+        action={
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-hover"
+          >
+            <Plus className="h-4 w-4" /> Add Product
+          </Link>
+        }
       />
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Heading level="h1" size="compact">
-          Products
-        </Heading>
-        <Link
-          href="/admin/products/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-        >
-          <Plus className="h-4 w-4" /> Add Product
-        </Link>
-      </div>
 
-      <div className="mb-6 rounded-2xl border border-border bg-surface p-4">
-        <div className="relative flex-1 max-w-md">
+      <div className="sticky top-20 z-30 -mx-4 mb-6 border-b border-border bg-bg/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:py-4">
+        <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
@@ -128,7 +124,9 @@ export default function AdminProductsPage() {
             >
               <div>
                 <div className="flex items-center gap-2">
-                  <Text className="font-medium">{product.name}</Text>
+                  <Heading level="h3" size="compact" className="text-base">
+                    {product.name}
+                  </Heading>
                   {!product.isActive && (
                     <span className="rounded-full bg-bg px-2 py-0.5 text-xs font-medium text-text-muted">Inactive</span>
                   )}

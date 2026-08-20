@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Heading, Text, Button } from '@/shared/ui';
+import { PageHeader } from '@/shared/ui/layout';
 import { Loader2, Search, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 
 interface Variant {
@@ -146,25 +147,25 @@ export default function AdminInventoryPage() {
   return (
     <div>
       <div className="sticky top-20 z-30 -mx-4 mb-6 border-b border-border bg-bg/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:py-4">
-        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <Heading level="h2" size="compact" balance>
-            Inventory Management
-          </Heading>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/admin/products/new"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-            >
-              Add Product
-            </Link>
-            <Link
-              href="/admin/categories"
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-hover"
-            >
-              Categories
-            </Link>
-          </div>
-        </div>
+        <PageHeader
+          title="Inventory Management"
+          action={
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/admin/products"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+              >
+                Products
+              </Link>
+              <Link
+                href="/admin/categories"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+              >
+                Categories
+              </Link>
+            </div>
+          }
+        />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="relative flex-1">

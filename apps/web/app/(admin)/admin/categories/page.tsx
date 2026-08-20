@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Heading, Text, Button } from '@/shared/ui';
+import { PageHeader } from '@/shared/ui/layout';
 import { Loader2 } from 'lucide-react';
 
 interface Category {
@@ -50,17 +51,17 @@ export default function AdminCategoriesPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <Heading level="h2" size="compact" balance>
-          Categories
-        </Heading>
-        <Link
-          href="/admin/categories/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-        >
-          Add Category
-        </Link>
-      </div>
+      <PageHeader
+        title="Categories"
+        action={
+          <Link
+            href="/admin/categories/new"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-hover"
+          >
+            Add Category
+          </Link>
+        }
+      />
 
       {loading ? (
         <div className="flex items-center justify-center py-16">

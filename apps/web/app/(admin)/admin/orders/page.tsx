@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Heading, Text } from '@/shared/ui';
+import { PageHeader } from '@/shared/ui/layout';
 import { Loader2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
@@ -105,9 +106,7 @@ export default function AdminOrdersPage() {
   return (
     <div>
       <div className="sticky top-20 z-30 -mx-4 mb-6 border-b border-border bg-bg/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:py-4">
-        <Heading level="h2" size="compact" balance className="mb-4">
-          Order Management
-        </Heading>
+        <PageHeader title="Order Management" />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="relative flex-1">
