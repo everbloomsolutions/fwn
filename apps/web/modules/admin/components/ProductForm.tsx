@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Heading, Text, Button } from '@/shared/ui';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, RefreshCw } from 'lucide-react';
 
 interface Category {
   _id: string;
@@ -113,13 +113,22 @@ export default function ProductForm({ product, categories, isEdit }: { product?:
       }),
     }));
 
+  const regenerateSKUs = () =>
+    setForm((f) => ({
+      ...f,
+      variants: f.variants.map((v) => ({
+        ...v,
+        sku: generateVariantSKU(f.sku, v.quantity, v.measurement),
+      })),
+    }));
+
   const addVariant = () =>
     setForm((f) => ({
       ...f,
       variants: [
         ...f.variants,
         {
-          sku: '',
+          sku: generateVariantSKU(f.sku, 1, 'kg'),
           quantity: 1,
           measurement: 'kg',
           price: 0,
@@ -309,10 +318,16 @@ export default function ProductForm({ product, categories, isEdit }: { product?:
           <Heading level="h3" size="compact" className="text-base">
             Variants
           </Heading>
-          <Button type="button" size="sm" onClick={addVariant}>
-            <Plus className="mr-1 h-4 w-4" />
-            Add Variant
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button type="button" size="sm" variant="secondary" onClick={regenerateSKUs} disabled={!form.sku}>
+              <RefreshCw className="mr-1 h-4 w-4" />
+              Regenerate SKUs
+            </Button>
+            <Button type="button" size="sm" onClick={addVariant}>
+              <Plus className="mr-1 h-4 w-4" />
+              Add Variant
+            </Button>
+          </div>
         </div>
         <div className="space-y-4">
           {form.variants.map((variant, idx) => (
