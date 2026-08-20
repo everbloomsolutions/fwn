@@ -27,6 +27,14 @@ export const createOrderSchema = z.object({
 });
 
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(['pending', 'paid', 'shipped', 'delivered', 'cancelled']),
+  status: z.enum(['pending', 'paid', 'shipped', 'delivered', 'cancelled']).optional(),
+  paymentStatus: z.enum(['pending', 'completed', 'failed', 'refunded']).optional(),
+  trackingNumber: z.string().optional(),
+  courier: z.string().optional(),
+});
+
+export const bulkUpdateOrderStatusSchema = z.object({
+  ids: z.array(z.string().min(2)).min(1, 'At least one order ID is required'),
+  status: z.enum(['pending', 'paid', 'shipped', 'delivered', 'cancelled']).optional(),
   paymentStatus: z.enum(['pending', 'completed', 'failed', 'refunded']).optional(),
 });

@@ -1,22 +1,39 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Container, Heading, Text, Card, CardContent, BackToTop } from '@/shared/ui';
 import { useCartStore } from '@/modules/shop/stores/cartStore';
+import { useToast } from '@/shared/ui';
 import { PUBLIC_ROUTES } from '@/shared/config/routes';
 import { FREE_SHIPPING_THRESHOLD } from '@/shared/config/shop';
-import { Minus, Plus, Trash2, ShoppingBag, Truck, ArrowRight } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, Truck, ArrowRight, Tag, X } from 'lucide-react';
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, updateQuantity, removeItem, subtotal, totalItems, freeShippingProgress, remainingForFreeShipping, isFreeShipping, loadCart } = useCartStore();
+  const { success } = useToast();
+  const { items, updateQuantity, removeItem, clearCart, subtotal, totalItems, freeShippingProgress, remainingForFreeShipping, isFreeShipping, loadCart } = useCartStore();
+  const [coupon, setCoupon] = useState('');
+  const [couponApplied, setCouponApplied] = useState(false);
 
   useEffect(() => {
     loadCart();
   }, [loadCart]);
+
+  const applyCoupon = () => {
+    if (coupon.trim()) {
+      setCouponApplied(true);
+      success('Coupon applied', `${coupon} has been applied to your cart`);
+    }
+  };
+
+  const handleClear = () => {
+    if (confirm('Clear your cart?')) {
+      clearCart();
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -40,9 +57,18 @@ export default function CartPage() {
 
   return (
     <Container maxWidth="xl" className="py-8 sm:py-12 lg:py-16">
-      <Heading level="h1" className="mb-8">
-        Shopping Cart ({totalItems})
-      </Heading>
+      <div className="mb-6 flex items-center justify-between">
+        <Heading level="h1">
+          Shopping Cart ({totalItems})
+        </Heading>
+        <button
+          onClick={handleClear}
+          className="inline-flex items-center gap-1 text-sm text-error hover:text-error/80"
+        >
+          <X className="h-4 w-4" />
+          Clear cart
+        </button>
+      </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
@@ -63,7 +89,7 @@ export default function CartPage() {
                   {item.name}
                 </Heading>
                 <Text className="text-sm text-text-muted">
-                  ₹{item.unitPrice} / {item.unit}
+                  ₹{item.unitPrice} / {item.unit} · Variant: {item.unit}
                 </Text>
               </div>
 
@@ -100,6 +126,15 @@ export default function CartPage() {
               </div>
             </Card>
           ))}
+
+          <div className="flex items-center justify-between">
+            <Link
+              href={PUBLIC_ROUTES.SHOP}
+              className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary-hover"
+            >
+              ← Continue shopping
+            </Link>
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -116,12 +151,37 @@ export default function CartPage() {
                 <span>Shipping</span>
                 <span>{isFreeShipping ? 'Free' : 'Calculated at checkout'}</span>
               </div>
+              {couponApplied && (
+                <div className="flex justify-between text-status-success">
+                  <span>Discount</span>
+                  <span>− ₹0</span>
+                </div>
+              )}
               <div className="border-t border-border pt-4">
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
                   <span>₹{subtotal}</span>
                 </div>
               </div>
+
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-text-muted" />
+                <input
+                  type="text"
+                  value={coupon}
+                  onChange={(e) => setCoupon(e.target.value)}
+                  placeholder="Coupon code"
+                  className="flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm"
+                />
+                <button
+                  onClick={applyCoupon}
+                  disabled={!coupon.trim() || couponApplied}
+                  className="rounded-lg bg-surface-hover px-3 py-2 text-sm font-medium hover:bg-surface disabled:opacity-50"
+                >
+                  Apply
+                </button>
+              </div>
+
               <button
                 onClick={() => router.push(PUBLIC_ROUTES.CHECKOUT)}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-medium text-white hover:bg-primary-hover"

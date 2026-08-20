@@ -5,7 +5,7 @@ const productVariantSchema = z.object({
   sku: z.string().min(2, 'Variant SKU is required'),
   quantity: z.number().min(0.01, 'Quantity must be positive'),
   measurement: z.enum(['g', 'kg', 'ml', 'ltr', 'pcs', 'unit']).default('g'),
-  unit: z.string().min(1, 'Unit display is required'),
+  unit: z.string().min(1, 'Unit display is required').optional().or(z.literal('')),
   price: z.number().min(0, 'Price must be non-negative'),
   stock: z.number().min(0, 'Stock must be non-negative').default(0),
   mrp: z.number().min(0).optional(),

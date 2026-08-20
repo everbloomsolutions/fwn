@@ -19,6 +19,22 @@ export const getCategories = async (
   }
 };
 
+export const getCategoryById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const category = await categoryService.getCategoryById(req.params.id);
+    if (!category) {
+      throw new AppError('Category not found', 404);
+    }
+    res.status(200).json({ success: true, data: category });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getCategoryBySlug = async (
   req: Request,
   res: Response,

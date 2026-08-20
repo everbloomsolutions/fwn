@@ -56,8 +56,10 @@ export const getOrders = async (
       if (req.query.startDate) filters.startDate = new Date(req.query.startDate as string);
       if (req.query.endDate) filters.endDate = new Date(req.query.endDate as string);
     }
-    const orders = await orderService.getOrders(userId, isAdmin, filters);
-    res.status(200).json({ success: true, data: orders });
+    filters.page = req.query.page ? Math.max(1, Number(req.query.page)) : 1;
+    filters.limit = req.query.limit ? Math.min(Number(req.query.limit), 100) : undefined;
+    const { orders, pagination } = await orderService.getOrders(userId, isAdmin, filters);
+    res.status(200).json({ success: true, data: orders, pagination });
   } catch (error) {
     next(error);
   }
@@ -106,6 +108,22 @@ export const trackOrder = async (
       throw new AppError('Order not found', 404);
     }
     res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const bulkUpdateOrderStatus = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    await orderService.bulkUpdateOrderStatus(req.body.ids, {
+      status: req.body.status,
+      paymentStatus: req.body.paymentStatus,
+    });
+    res.status(200).json({ success: true, message: 'Orders updated' });
   } catch (error) {
     next(error);
   }

@@ -7,7 +7,7 @@ import { API_ENDPOINTS } from '@/shared/config/api';
 import { ProductCard } from '@/modules/shop/components/ProductCard';
 import { Container, Heading, Text, BackToTop } from '@/shared/ui';
 import { cn } from '@/shared/utils/cn';
-import { Search, SlidersHorizontal, Loader2, ChevronDown, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Loader2, ChevronDown, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProductVariant {
   _id: string;
@@ -36,6 +36,12 @@ interface Product {
 interface ProductResponse {
   success: boolean;
   data: Product[];
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 interface Category {
@@ -51,11 +57,12 @@ interface CategoryResponse {
 
 type SortOption = 'newest' | 'popular' | 'best_selling' | 'price_asc' | 'price_desc';
 
-const PACK_OPTIONS = ['200g', '500g', '1kg', '200ml', '500ml', '1ltr', '1pcs', '2pcs', '3pcs'];
+const LIMIT = 12;
 
 export default function ShopPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const initialCategory = searchParams.get('category') || '';
   const initialBestSeller = searchParams.get('isBestSeller') === 'true';
 
@@ -64,87 +71,94 @@ export default function ShopPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
-  const [selectedPacks, setSelectedPacks] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const [inStockOnly, setInStockOnly] = useState(false);
+  const [selectedPacks, setSelectedPacks] = useState<string[]>(searchParams.get('unit')?.split(',').filter(Boolean) || []);
+  const [sortBy, setSortBy] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'newest');
+  const [inStockOnly, setInStockOnly] = useState(searchParams.get('inStock') === 'true');
   const [bestSellerOnly, setBestSellerOnly] = useState(initialBestSeller);
+  const [page, setPage] = useState(Math.max(1, Number(searchParams.get('page') || 1)));
+  const [pagination, setPagination] = useState<ProductResponse['pagination']>({ total: 0, page: 1, limit: LIMIT, totalPages: 1 });
 
   useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true);
-        const [productsRes, categoriesRes] = await Promise.all([
-          apiRequest<ProductResponse>({
-            method: 'GET',
-            url: API_ENDPOINTS.products.LIST,
-          }),
-          apiRequest<CategoryResponse>({
-            method: 'GET',
-            url: API_ENDPOINTS.categories.LIST,
-          }),
-        ]);
-        setProducts(productsRes.data);
-        setCategories(categoriesRes.data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load products');
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    apiRequest<CategoryResponse>({
+      method: 'GET',
+      url: API_ENDPOINTS.categories.LIST,
+    })
+      .then((res) => setCategories(res.data))
+      .catch(() => setCategories([]));
   }, []);
 
-  const filteredProducts = useMemo(() => {
-    let list = [...products];
+  const packOptions = useMemo(() => {
+    const units = new Set<string>();
+    products.forEach((p) => p.variants.forEach((v) => {
+      if (v.isActive !== false && v.stock > 0) units.add(v.unit);
+    }));
+    return Array.from(units).sort();
+  }, [products]);
 
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter((p) => p.name.toLowerCase().includes(q) || p.category.name.toLowerCase().includes(q));
+  const buildUrl = () => {
+    const params = new URLSearchParams();
+    if (page > 1) params.set('page', page.toString());
+    if (search.trim()) params.set('search', search.trim());
+    if (selectedCategory) params.set('category', selectedCategory);
+    if (sortBy !== 'newest') params.set('sort', sortBy);
+    if (inStockOnly) params.set('inStock', 'true');
+    if (bestSellerOnly) params.set('isBestSeller', 'true');
+    if (selectedPacks.length) params.set('unit', selectedPacks.join(','));
+    return `/shop?${params.toString()}`;
+  };
+
+  async function loadProducts() {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = new URLSearchParams();
+      params.set('page', page.toString());
+      params.set('limit', LIMIT.toString());
+      if (search.trim()) params.set('search', search.trim());
+      if (selectedCategory) params.set('category', selectedCategory);
+      if (sortBy !== 'newest') params.set('sort', sortBy);
+      if (inStockOnly) params.set('inStock', 'true');
+      if (bestSellerOnly) params.set('isBestSeller', 'true');
+      if (selectedPacks.length) params.set('unit', selectedPacks.join(','));
+      const [productsRes] = await Promise.all([
+        apiRequest<ProductResponse>({
+          method: 'GET',
+          url: `${API_ENDPOINTS.products.LIST}?${params.toString()}`,
+        }),
+      ]);
+      setProducts(productsRes.data);
+      setPagination(productsRes.pagination || { total: 0, page: 1, limit: LIMIT, totalPages: 1 });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load products');
+      setProducts([]);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    if (selectedCategory) {
-      list = list.filter((p) => p.category.slug === selectedCategory);
-    }
+  useEffect(() => {
+    loadProducts();
+  }, [page, selectedCategory, sortBy, inStockOnly, bestSellerOnly, selectedPacks]);
 
-    if (selectedPacks.length > 0) {
-      list = list.filter((p) => p.variants.some((v) => selectedPacks.includes(v.unit) && v.isActive !== false));
-    }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+      loadProducts();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-    if (inStockOnly) {
-      list = list.filter((p) => p.stock > 0);
-    }
-
-    if (bestSellerOnly) {
-      list = list.filter((p) => p.isBestSeller);
-    }
-
-    switch (sortBy) {
-      case 'price_asc':
-        list.sort((a, b) => a.price - b.price);
-        break;
-      case 'price_desc':
-        list.sort((a, b) => b.price - a.price);
-        break;
-      case 'popular':
-        list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case 'best_selling':
-        list.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
-        break;
-      case 'newest':
-      default:
-        list.sort((a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime());
-    }
-
-    return list;
-  }, [products, search, selectedCategory, selectedPacks, sortBy, inStockOnly, bestSellerOnly]);
+  useEffect(() => {
+    router.replace(buildUrl(), { scroll: false });
+  }, [page, search, selectedCategory, sortBy, inStockOnly, bestSellerOnly, selectedPacks]);
 
   const activeCategory = categories.find((c) => c.slug === selectedCategory);
 
   const togglePack = (pack: string) => {
     setSelectedPacks((prev) => (prev.includes(pack) ? prev.filter((p) => p !== pack) : [...prev, pack]));
+    setPage(1);
   };
 
   const resetFilters = () => {
@@ -154,6 +168,7 @@ export default function ShopPage() {
     setSortBy('newest');
     setInStockOnly(false);
     setBestSellerOnly(false);
+    setPage(1);
     router.replace('/shop');
   };
 
@@ -183,7 +198,10 @@ export default function ShopPage() {
             type="text"
             placeholder="Search products or categories..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="w-full rounded-lg border border-border bg-bg py-2.5 pl-9 pr-4 text-sm text-text outline-none focus:border-primary"
           />
 
@@ -193,11 +211,7 @@ export default function ShopPage() {
                 value={selectedCategory}
                 onChange={(e) => {
                   setSelectedCategory(e.target.value);
-                  if (e.target.value) {
-                    router.replace(`/shop?category=${e.target.value}`);
-                  } else {
-                    router.replace('/shop');
-                  }
+                  setPage(1);
                 }}
                 className="appearance-none rounded-lg border border-border bg-bg py-2.5 pl-3 pr-8 text-sm text-text"
               >
@@ -214,7 +228,10 @@ export default function ShopPage() {
             <div className="relative">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                onChange={(e) => {
+                  setSortBy(e.target.value as SortOption);
+                  setPage(1);
+                }}
                 className="appearance-none rounded-lg border border-border bg-bg py-2.5 pl-3 pr-8 text-sm text-text"
               >
                 <option value="newest">Newest</option>
@@ -230,7 +247,10 @@ export default function ShopPage() {
               <input
                 type="checkbox"
                 checked={inStockOnly}
-                onChange={(e) => setInStockOnly(e.target.checked)}
+                onChange={(e) => {
+                  setInStockOnly(e.target.checked);
+                  setPage(1);
+                }}
                 className="h-4 w-4 accent-primary"
               />
               In Stock
@@ -240,7 +260,10 @@ export default function ShopPage() {
               <input
                 type="checkbox"
                 checked={bestSellerOnly}
-                onChange={(e) => setBestSellerOnly(e.target.checked)}
+                onChange={(e) => {
+                  setBestSellerOnly(e.target.checked);
+                  setPage(1);
+                }}
                 className="h-4 w-4 accent-primary"
               />
               Best Sellers
@@ -255,27 +278,29 @@ export default function ShopPage() {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
-          <div className="flex items-center gap-2 text-sm text-text-muted">
-            <SlidersHorizontal className="h-4 w-4" />
-            <span className="hidden sm:inline">Pack size:</span>
+        {packOptions.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
+            <div className="flex items-center gap-2 text-sm text-text-muted">
+              <SlidersHorizontal className="h-4 w-4" />
+              <span className="hidden sm:inline">Pack size:</span>
+            </div>
+            {packOptions.map((pack) => {
+              const active = selectedPacks.includes(pack);
+              return (
+                <button
+                  key={pack}
+                  onClick={() => togglePack(pack)}
+                  className={cn(
+                    'rounded-full border px-2.5 py-1 text-xs font-medium transition',
+                    active ? 'border-primary bg-primary text-white' : 'border-border bg-bg text-text hover:border-primary'
+                  )}
+                >
+                  {pack}
+                </button>
+              );
+            })}
           </div>
-          {PACK_OPTIONS.map((pack) => {
-            const active = selectedPacks.includes(pack);
-            return (
-              <button
-                key={pack}
-                onClick={() => togglePack(pack)}
-                className={cn(
-                  'rounded-full border px-2.5 py-1 text-xs font-medium transition',
-                  active ? 'border-primary bg-primary text-white' : 'border-border bg-bg text-text hover:border-primary'
-                )}
-              >
-                {pack}
-              </button>
-            );
-          })}
-        </div>
+        )}
       </div>
 
       {loading ? (
@@ -286,16 +311,45 @@ export default function ShopPage() {
         <div className="py-16 text-center">
           <Text className="text-error">{error}</Text>
         </div>
-      ) : filteredProducts.length === 0 ? (
+      ) : products.length === 0 ? (
         <div className="py-16 text-center">
           <Text className="text-text-muted">No products found. Try a different search or filter.</Text>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+
+          {pagination && pagination.totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-between">
+              <Text className="text-sm text-text-muted">
+                {pagination.total} products - page {pagination.page} of {pagination.totalPages}
+              </Text>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="inline-flex items-center rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-hover disabled:opacity-50"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="text-sm text-text-muted">
+                  {page} / {pagination.totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                  disabled={page === pagination.totalPages}
+                  className="inline-flex items-center rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-hover disabled:opacity-50"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <BackToTop />

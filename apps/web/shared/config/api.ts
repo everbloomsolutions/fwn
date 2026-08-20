@@ -48,12 +48,18 @@ export const API_ENDPOINTS = {
   products: {
     LIST: `${API_BASE}/products`,
     DETAIL: (slug: string) => `${API_BASE}/products/${slug}`,
+    ADMIN_DETAIL: (id: string) => `${API_BASE}/products/admin/${id}`,
+    CREATE: `${API_BASE}/products`,
+    UPDATE: (id: string) => `${API_BASE}/products/${id}`,
+    DELETE: (id: string) => `${API_BASE}/products/${id}`,
+    INVENTORY: (id: string) => `${API_BASE}/products/${id}/inventory`,
   },
 
   // Categories
   categories: {
     LIST: `${API_BASE}/categories`,
     DETAIL: (slug: string) => `${API_BASE}/categories/${slug}`,
+    ADMIN_DETAIL: (id: string) => `${API_BASE}/categories/admin/${id}`,
   },
 
   // Cart

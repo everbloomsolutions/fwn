@@ -83,10 +83,21 @@ export interface GetProductsFilters {
   inStock?: boolean;
   isBestSeller?: boolean;
   sort?: 'popular' | 'best_selling' | 'price_asc' | 'price_desc' | 'newest';
+  page?: number;
   limit?: number;
 }
 
-export const getProducts = async (filters: GetProductsFilters = {}): Promise<IProduct[]> => {
+export interface PaginatedProducts {
+  products: IProduct[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export const getProducts = async (filters: GetProductsFilters = {}): Promise<PaginatedProducts> => {
   const query: Record<string, unknown> = {};
 
   if (filters.active !== undefined) {
@@ -101,10 +112,11 @@ export const getProducts = async (filters: GetProductsFilters = {}): Promise<IPr
   }
 
   if (filters.search) {
+    const re = new RegExp(filters.search, 'i');
     query.$or = [
-      { $text: { $search: filters.search } },
-      { name: { $regex: filters.search, $options: 'i' } },
-      { tags: { $in: [new RegExp(filters.search, 'i')] } },
+      { name: { $regex: re } },
+      { sku: { $regex: re } },
+      { tags: { $in: [re] } },
     ];
   }
 
@@ -149,15 +161,29 @@ export const getProducts = async (filters: GetProductsFilters = {}): Promise<IPr
       sort = { createdAt: -1 };
   }
 
-  const dbQuery = Product.find(query)
-    .populate('category', 'name slug')
-    .sort(sort);
+  const page = Math.max(1, filters.page || 1);
+  const limit = Math.min(filters.limit && filters.limit > 0 ? filters.limit : 20, 100);
+  const skip = (page - 1) * limit;
 
-  if (filters.limit && filters.limit > 0) {
-    dbQuery.limit(filters.limit);
-  }
+  const [products, total] = await Promise.all([
+    Product.find(query)
+      .populate('category', 'name slug')
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .exec(),
+    Product.countDocuments(query).exec(),
+  ]);
 
-  return await dbQuery.exec();
+  return {
+    products,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+    },
+  };
 };
 
 export const getProductBySlug = async (slug: string): Promise<IProduct | null> => {

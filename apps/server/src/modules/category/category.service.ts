@@ -25,6 +25,10 @@ export const getCategoryBySlug = async (slug: string): Promise<ICategory | null>
   return await Category.findOne({ slug }).exec();
 };
 
+export const getCategoryById = async (id: string): Promise<ICategory | null> => {
+  return await Category.findById(id).exec();
+};
+
 export const updateCategory = async (
   id: string,
   data: Partial<CreateCategoryData>

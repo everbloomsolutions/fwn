@@ -27,6 +27,12 @@ interface Product {
 interface ProductResponse {
   success: boolean;
   data: Product[];
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 interface SuggestedProductsProps {

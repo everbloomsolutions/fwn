@@ -12,6 +12,7 @@ router.get('/', categoryController.getCategories);
 router.get('/:slug', categoryController.getCategoryBySlug);
 
 // Admin routes
+router.get('/admin/:id', authenticate, requireAdmin, categoryController.getCategoryById);
 router.post('/', authenticate, requireAdmin, validateBody(createCategorySchema), categoryController.createCategory);
 router.put('/:id', authenticate, requireAdmin, validateBody(updateCategorySchema), categoryController.updateCategory);
 router.delete('/:id', authenticate, requireAdmin, categoryController.deleteCategory);

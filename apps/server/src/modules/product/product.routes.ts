@@ -12,6 +12,7 @@ router.get('/', productController.getProducts);
 router.get('/:slug', productController.getProductBySlug);
 
 // Admin routes
+router.get('/admin/:id', authenticate, requireAdmin, productController.getProductById);
 router.post('/', authenticate, requireAdmin, validateBody(createProductSchema), productController.createProduct);
 router.put('/:id', authenticate, requireAdmin, validateBody(updateProductSchema), productController.updateProduct);
 router.patch('/:id/inventory', authenticate, requireAdmin, validateBody(updateInventorySchema), productController.updateProductInventory);

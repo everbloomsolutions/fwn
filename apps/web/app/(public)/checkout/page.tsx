@@ -104,8 +104,18 @@ export default function CheckoutPage() {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
+  const errors = {
+    name: !form.name,
+    email: !form.email || !form.email.includes('@'),
+    phone: !form.phone || form.phone.length < 10,
+    address: !form.address,
+    city: !form.city,
+    state: !form.state,
+    pincode: !form.pincode || form.pincode.length < 6,
+  };
+
   const canProceed = {
-    address: form.name && form.email && form.phone && form.address && form.city && form.state && form.pincode,
+    address: !Object.values(errors).some(Boolean),
     delivery: true,
     payment: true,
   };
@@ -473,7 +483,19 @@ export default function CheckoutPage() {
               </div>
             ))}
             <div className="border-t border-border pt-4">
-              <div className="flex justify-between text-lg font-semibold">
+              <div className="flex justify-between text-sm text-text-muted">
+                <span>Subtotal</span>
+                <span>₹{subtotal}</span>
+              </div>
+              <div className="flex justify-between text-sm text-text-muted">
+                <span>Shipping</span>
+                <span>{isFreeShipping ? 'Free' : 'Calculated'}</span>
+              </div>
+              <div className="flex justify-between text-sm text-text-muted">
+                <span>Tax</span>
+                <span>Included</span>
+              </div>
+              <div className="mt-2 flex justify-between text-lg font-semibold">
                 <span>Total</span>
                 <span>₹{subtotal}</span>
               </div>

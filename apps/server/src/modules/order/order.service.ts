@@ -3,6 +3,7 @@ import { Product } from '../product/product.model';
 import { User } from '../user/user.model';
 import { assignCartToUser } from '../cart/cart.service';
 import { updateTopBestSellers } from '../product/product.service';
+import { OrderStatusLog } from './order-status-log.model';
 import mongoose from 'mongoose';
 import Razorpay from 'razorpay';
 import { logger } from '../../core/middleware/logger';
@@ -183,13 +184,25 @@ export interface GetOrdersFilters {
   startDate?: Date;
   endDate?: Date;
   search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedOrders {
+  orders: IOrder[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export const getOrders = async (
   userId?: string,
   isAdmin = false,
   filters: GetOrdersFilters = {}
-): Promise<IOrder[]> => {
+): Promise<PaginatedOrders> => {
   const query: Record<string, unknown> = {};
   if (!isAdmin && userId) {
     query.userId = new mongoose.Types.ObjectId(userId);
@@ -213,7 +226,25 @@ export const getOrders = async (
       { 'shippingAddress.phone': re },
     ];
   }
-  return await Order.find(query).sort({ createdAt: -1 }).exec();
+
+  const page = Math.max(1, filters.page || 1);
+  const limit = Math.min(filters.limit && filters.limit > 0 ? filters.limit : 20, 100);
+  const skip = (page - 1) * limit;
+
+  const [orders, total] = await Promise.all([
+    Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
+    Order.countDocuments(query).exec(),
+  ]);
+
+  return {
+    orders,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+    },
+  };
 };
 
 export const getOrderById = async (id: string): Promise<IOrder | null> => {
@@ -238,7 +269,12 @@ const validOrderStatusTransitions: Record<IOrder['status'], IOrder['status'][]> 
 
 export const updateOrderStatus = async (
   id: string,
-  data: { status?: IOrder['status']; paymentStatus?: IOrder['paymentStatus'] }
+  data: {
+    status?: IOrder['status'];
+    paymentStatus?: IOrder['paymentStatus'];
+    trackingNumber?: string;
+    courier?: string;
+  }
 ): Promise<IOrder | null> => {
   const existing = await Order.findById(id).exec();
   if (!existing) return null;
@@ -299,5 +335,20 @@ export const updateOrderStatus = async (
     updateTopBestSellers().catch((err) => logger.warn('Failed to update best sellers:', err));
   }
 
+  await OrderStatusLog.create({
+    orderId: order._id,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+  });
+
   return order;
+};
+
+export const bulkUpdateOrderStatus = async (
+  ids: string[],
+  data: { status?: IOrder['status']; paymentStatus?: IOrder['paymentStatus'] }
+): Promise<void> => {
+  for (const id of ids) {
+    await updateOrderStatus(id, data);
+  }
 };

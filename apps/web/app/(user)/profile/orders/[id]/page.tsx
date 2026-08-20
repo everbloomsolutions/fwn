@@ -32,6 +32,8 @@ interface Order {
   shippingAddress: { name: string; phone: string; email?: string; address: string; city: string; state: string; pincode: string };
   deliveryNotes?: string;
   estimatedDelivery?: string;
+  trackingNumber?: string;
+  courier?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -163,6 +165,11 @@ export default function OrderDetailPage() {
         {order.estimatedDelivery && order.status !== 'cancelled' && (
           <Text className="text-text-muted">
             Estimated delivery: {new Date(order.estimatedDelivery).toLocaleDateString()}
+          </Text>
+        )}
+        {order.trackingNumber && (
+          <Text className="text-text-muted">
+            Courier: {order.courier || 'N/A'} · Tracking: {order.trackingNumber}
           </Text>
         )}
       </div>

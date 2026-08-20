@@ -22,10 +22,27 @@ export const getProducts = async (
       inStock: req.query.inStock === 'true',
       isBestSeller: req.query.isBestSeller !== undefined ? req.query.isBestSeller === 'true' : undefined,
       sort: (req.query.sort as productService.GetProductsFilters['sort']) || undefined,
+      page: req.query.page ? Math.max(1, Number(req.query.page)) : 1,
       limit: req.query.limit ? Math.min(Number(req.query.limit), 100) : undefined,
     };
-    const products = await productService.getProducts(filters);
-    res.status(200).json({ success: true, data: products });
+    const { products, pagination } = await productService.getProducts(filters);
+    res.status(200).json({ success: true, data: products, pagination });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProductById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const product = await productService.getProductById(req.params.id);
+    if (!product) {
+      throw new AppError('Product not found', 404);
+    }
+    res.status(200).json({ success: true, data: product });
   } catch (error) {
     next(error);
   }

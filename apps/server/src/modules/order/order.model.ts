@@ -38,6 +38,8 @@ export interface IOrder extends Document {
   };
   deliveryNotes?: string;
   estimatedDelivery?: Date;
+  trackingNumber?: string;
+  courier?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -127,6 +129,12 @@ const orderSchema = new Schema<IOrder>(
     },
     estimatedDelivery: {
       type: Date,
+    },
+    trackingNumber: {
+      type: String,
+    },
+    courier: {
+      type: String,
     },
   },
   {
