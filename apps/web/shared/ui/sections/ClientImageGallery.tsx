@@ -1,6 +1,6 @@
 'use client';
 
-import { HTMLAttributes, useState, useEffect } from 'react';
+import { HTMLAttributes } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { cn } from '@/shared/utils/cn';
@@ -25,28 +25,19 @@ export function ClientImageGallery({
   className,
   ...props
 }: ClientImageGalleryProps) {
-  const [currentIndex, setCurrentIndex] = useState(expandedIndex);
-
-  useEffect(() => {
-    if (expandedIndex !== undefined) {
-      setCurrentIndex(expandedIndex);
-    }
-  }, [expandedIndex]);
+  const currentIndex = expandedIndex;
 
   const handlePrevious = () => {
     const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
-    setCurrentIndex(newIndex);
     onExpand(newIndex);
   };
 
   const handleNext = () => {
     const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
-    setCurrentIndex(newIndex);
     onExpand(newIndex);
   };
 
   const handleThumbnailClick = (index: number) => {
-    setCurrentIndex(index);
     onExpand(index);
   };
 

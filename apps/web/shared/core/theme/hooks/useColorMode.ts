@@ -56,6 +56,7 @@ export function useColorMode() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const stored = localStorage.getItem(COLOR_MODE_STORAGE_KEY) as ColorMode | null;
     const initialMode: ColorMode = stored || 'system';

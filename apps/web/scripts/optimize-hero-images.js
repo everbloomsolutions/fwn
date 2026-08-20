@@ -17,7 +17,7 @@ async function optimizeImages() {
   let sharp;
   try {
     sharp = require('sharp');
-  } catch (_error) {
+  } catch {
     console.error('❌ Sharp is not installed. Installing...');
     console.log('Run: cd front-end && npm install sharp --save-dev');
     console.log('\nNote: Next.js Image component will automatically optimize images at build time.');

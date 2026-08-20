@@ -50,7 +50,7 @@ export function ProductCard({ product }: { product: ProductCardProps }) {
       return;
     }
     try {
-      await addItem(product._id, variant._id, product.name, variant.unit, variant.price, quantity, product.images[0]);
+      await addItem(product._id, variant._id, product.name, variant.unit, variant.price, quantity);
       setAdded(true);
       success('Added to cart', `${product.name} (${variant.unit}) added to cart`);
     } catch (err) {

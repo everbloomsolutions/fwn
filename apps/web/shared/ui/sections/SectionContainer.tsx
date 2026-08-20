@@ -52,7 +52,7 @@ export const SectionContainer = forwardRef<HTMLElement, SectionContainerProps>(
   }, ref) => {
     return (
       <Component
-        ref={ref as any}
+        ref={ref as never}
         className={cn(
           paddingClasses[padding],
           backgroundClasses[background],

@@ -1,6 +1,7 @@
 'use client';
 
 import { HTMLAttributes, forwardRef, useState } from 'react';
+import Image from 'next/image';
 import { cn } from '@/shared/utils/cn';
 import { User } from 'lucide-react';
 
@@ -48,11 +49,12 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
         aria-label={alt}
         {...props}
       >
-        {showImage ? (
-          <img
+        {showImage && src ? (
+          <Image
             src={src}
-            alt={alt}
-            className={cn('w-full h-full object-cover', shapeClasses[shape])}
+            alt={alt || ''}
+            fill
+            className={cn('object-cover', shapeClasses[shape])}
             onError={() => setImageError(true)}
           />
         ) : (

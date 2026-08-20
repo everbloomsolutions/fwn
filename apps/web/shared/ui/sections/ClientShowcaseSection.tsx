@@ -30,14 +30,17 @@ export function ClientShowcaseSection({
   className,
   ...props
 }: ClientShowcaseSectionProps) {
-  const [selectedClientIndex, setSelectedClientIndex] = useState(0);
+  const firstImageIndex = clients.findIndex((client) => client.images && client.images.length > 0);
+  const initialIndex = firstImageIndex >= 0 ? firstImageIndex : 0;
+  const [selectedClientIndex, setSelectedClientIndex] = useState(initialIndex);
   const [isGalleryOpen, setIsGalleryOpen] = useState(true); // Auto-open gallery
-  const [galleryClientIndex, setGalleryClientIndex] = useState<number | null>(null);
+  const [galleryClientIndex, setGalleryClientIndex] = useState<number | null>(
+    firstImageIndex >= 0 ? firstImageIndex : null
+  );
   const [markerPosition, setMarkerPosition] = useState<{ x: number; y: number } | null>(null);
   const [mapSize, setMapSize] = useState<{ width: number; height: number } | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const clientCycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isInitializedRef = useRef(false);
 
   const selectedClient = clients[selectedClientIndex];
   const galleryClient = galleryClientIndex !== null ? clients[galleryClientIndex] : null;
@@ -48,16 +51,6 @@ export function ClientShowcaseSection({
       .map((client, index) => ({ client, index }))
       .filter(({ client }) => client.images && client.images.length > 0);
   }, [clients]);
-
-  // Initialize with first client with images
-  useEffect(() => {
-    if (clientsWithImages.length > 0 && !isInitializedRef.current) {
-      const firstIndex = clientsWithImages[0].index;
-      setSelectedClientIndex(firstIndex);
-      setGalleryClientIndex(firstIndex);
-      isInitializedRef.current = true;
-    }
-  }, [clientsWithImages]);
 
   // Auto-cycle through clients with images (continues even when gallery is closed)
   useEffect(() => {

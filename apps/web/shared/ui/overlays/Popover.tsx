@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useRef, useEffect, useCallback } from 'react';
+import { ReactNode, useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/shared/utils/cn';
@@ -32,12 +32,15 @@ export function Popover({
   const isControlled = controlledOpen !== undefined;
   const isOpen = isControlled ? controlledOpen : internalOpen;
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    if (!isControlled) {
-      setInternalOpen(newOpen);
-    }
-    onOpenChange?.(newOpen);
-  }, [isControlled, onOpenChange]);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!isControlled) {
+        setInternalOpen(newOpen);
+      }
+      onOpenChange?.(newOpen);
+    },
+    [isControlled, onOpenChange]
+  );
 
   // Position calculation with proper timing and boundary detection
   const [positionStyle, setPositionStyle] = useState<React.CSSProperties>({});
@@ -158,8 +161,9 @@ export function Popover({
   }, [isOpen, position, align]);
 
   // Calculate position when popover opens
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPositionStyle({});
       return;
     }
@@ -218,6 +222,7 @@ export function Popover({
         ref={triggerRef}
         className="inline-flex items-center"
         style={{ position: 'relative' }}
+        onClick={() => handleOpenChange(!isOpen)}
       >
         {trigger}
       </div>

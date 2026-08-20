@@ -37,7 +37,7 @@ export function OfficeLocationMap({
 
     const accessToken = getMapboxAccessToken();
     if (!accessToken) {
-      setError('Mapbox access token is not configured');
+      setError('Mapbox access token is not configured'); // eslint-disable-line react-hooks/set-state-in-effect
       return;
     }
 

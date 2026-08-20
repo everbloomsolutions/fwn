@@ -1,6 +1,6 @@
 'use client';
 
-import { InputHTMLAttributes, forwardRef, useId, useState } from 'react';
+import { InputHTMLAttributes, forwardRef, useId } from 'react';
 import { Calendar } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 

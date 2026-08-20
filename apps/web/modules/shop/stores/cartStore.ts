@@ -37,7 +37,7 @@ interface CartState {
   isLoading: boolean;
   error: string | null;
   loadCart: () => Promise<void>;
-  addItem: (productId: string, variantId: string, name: string, unit: string, unitPrice: number, quantity?: number, image?: string) => Promise<void>;
+  addItem: (productId: string, variantId: string, name: string, unit: string, unitPrice: number, quantity?: number) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -80,7 +80,7 @@ export const useCartStore = create<CartState>()(
         }
       },
 
-      addItem: async (productId, variantId, name, unit, unitPrice, quantity = 1, image) => {
+      addItem: async (productId, variantId, name, unit, unitPrice, quantity = 1) => {
         try {
           set({ isLoading: true, error: null });
           const response = await apiRequest<{ data: ApiCart }>({

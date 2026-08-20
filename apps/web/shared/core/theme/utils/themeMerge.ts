@@ -6,10 +6,8 @@
 /**
  * Deep merge two objects
  */
-export function deepMerge<T extends Record<string, any>>(
-  target: T,
-  source: Partial<T>
-): T {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function deepMerge<T extends Record<string, unknown>>(target: any, source: any): T {
   const output = { ...target };
 
   for (const key in source) {
@@ -21,9 +19,9 @@ export function deepMerge<T extends Record<string, any>>(
       !(sourceValue.constructor && sourceValue.constructor.name === 'Date')
     ) {
       output[key] = deepMerge(
-        (target[key] || {}) as T[Extract<keyof T, string>],
-        sourceValue as any
-      );
+        (target[key] || {}) as Record<string, unknown>,
+        sourceValue as Record<string, unknown>
+      ) as T[Extract<keyof T, string>];
     } else if (sourceValue !== undefined) {
       output[key] = sourceValue as T[Extract<keyof T, string>];
     }
@@ -43,11 +41,10 @@ export function mergeThemes<T extends Record<string, unknown>>(
   if (!firstTheme || Object.keys(firstTheme).length === 0) {
     throw new Error('At least one theme must be provided');
   }
-  
+
   // Use first theme as base, then merge the rest
   return restThemes.reduce(
     (acc, theme) => deepMerge(acc, theme),
     firstTheme as T
   ) as T;
 }
-

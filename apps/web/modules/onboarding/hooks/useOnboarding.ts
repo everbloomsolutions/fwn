@@ -51,7 +51,7 @@ export function useOnboarding() {
     };
 
     fetchStatus();
-  }, [isAuthenticated, user?._id]); // Only refetch if user ID changes
+  }, [isAuthenticated, user, status]);
 
   // Reset fetch flag when user changes
   useEffect(() => {

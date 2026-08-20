@@ -117,14 +117,14 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(
   ({ className, as: Component = 'label', required, children, ...props }, ref) => {
     return (
       <Component
-        ref={Component === 'label' ? (ref as any) : undefined}
+        ref={Component === 'label' ? (ref as never) : undefined}
         className={cn(
           'text-sm font-medium leading-normal',
           'text-text',
           'block',
           className
         )}
-        {...(props as any)}
+        {...(props as Record<string, unknown>)}
       >
         {children}
         {required && <span className="text-status-error ml-1">*</span>}

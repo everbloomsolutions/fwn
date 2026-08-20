@@ -35,7 +35,7 @@ export function MapboxMap({
 
     const accessToken = getMapboxAccessToken();
     if (!accessToken) {
-      setError('Mapbox access token is not configured');
+      setError('Mapbox access token is not configured'); // eslint-disable-line react-hooks/set-state-in-effect
       return;
     }
 
@@ -64,7 +64,7 @@ export function MapboxMap({
           const purpleColor = '#c4b5fd'; // light purple
 
           // Iterate through all layers and apply colors based on layer properties
-          style.layers.forEach((layer: any) => {
+          style.layers.forEach((layer: { id: string; type: string; 'source-layer'?: string }) => {
             const layerId = layer.id;
             const sourceLayer = layer['source-layer'];
             const layerType = layer.type;
@@ -118,7 +118,7 @@ export function MapboxMap({
                   map.current?.setPaintProperty(layerId, 'fill-color', purpleColor);
                 }
               }
-            } catch (err) {
+            } catch {
               // Skip layers that don't support the property
             }
           });

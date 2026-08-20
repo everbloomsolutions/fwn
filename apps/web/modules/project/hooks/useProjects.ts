@@ -38,7 +38,7 @@ export function useProjects(filters?: {
     };
 
     fetchProjects();
-  }, [isAuthenticated, filters?.status, filters?.serviceType]);
+  }, [isAuthenticated, filters]);
 
   const refetch = async () => {
     if (!isAuthenticated) return;

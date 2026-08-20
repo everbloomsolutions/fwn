@@ -63,7 +63,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       return;
     }
     try {
-      await addItem(product._id, variant._id, product.name, variant.unit, variant.price, quantity, product.images[0]);
+      await addItem(product._id, variant._id, product.name, variant.unit, variant.price, quantity);
       success('Added to cart', `${product.name} (${variant.unit}) added to cart`);
     } catch (err) {
       showError('Failed to add', err instanceof Error ? err.message : 'Please try again');
@@ -80,7 +80,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       return;
     }
     try {
-      await addItem(product._id, variant._id, product.name, variant.unit, variant.price, quantity, product.images[0]);
+      await addItem(product._id, variant._id, product.name, variant.unit, variant.price, quantity);
       router.push(PUBLIC_ROUTES.CHECKOUT);
     } catch (err) {
       showError('Failed to add', err instanceof Error ? err.message : 'Please try again');

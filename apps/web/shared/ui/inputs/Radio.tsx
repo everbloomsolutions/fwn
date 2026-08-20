@@ -25,7 +25,6 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
               id={radioId}
               ref={ref}
               className="peer sr-only"
-              aria-invalid={error ? 'true' : 'false'}
               aria-describedby={error ? errorId : descriptionId}
               {...props}
             />
@@ -102,7 +101,7 @@ export function RadioGroup({
     <div className={cn('space-y-2', className)} role="radiogroup" aria-invalid={error ? 'true' : 'false'}>
       {Children.map(children, (child: React.ReactNode) => {
         if (isValidElement(child)) {
-          const childValue = (child.props as any).value;
+          const childValue = (child.props as { value?: string }).value;
           if (childValue !== undefined) {
             return cloneElement(child as React.ReactElement<RadioProps>, {
               name,
@@ -111,7 +110,7 @@ export function RadioGroup({
                 if (e.target.checked && childValue) {
                   onValueChange?.(childValue);
                 }
-                (child.props as any).onChange?.(e);
+                (child.props as { onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void }).onChange?.(e);
               },
             });
           }

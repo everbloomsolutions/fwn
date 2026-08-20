@@ -23,7 +23,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
           ref={ref}
           className={baseClassName}
           whileHover={hoverScale}
-          {...(props as any)}
+          {...(props as Record<string, unknown>)}
         />
       );
     }

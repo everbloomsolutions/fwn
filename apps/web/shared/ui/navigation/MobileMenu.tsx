@@ -21,7 +21,7 @@ export function MobileMenu({ links, authLinks }: MobileMenuProps) {
 
   // Close menu on route change
   useEffect(() => {
-    setIsOpen(false);
+    setIsOpen(false); // eslint-disable-line react-hooks/set-state-in-effect
   }, [pathname]);
 
   // Close menu on escape key

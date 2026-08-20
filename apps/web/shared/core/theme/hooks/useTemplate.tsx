@@ -5,7 +5,7 @@
 
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import type { PresetName } from '../presets';
 
 export type TemplateType = PresetName;
@@ -26,20 +26,14 @@ export function TemplateProvider({
   children: ReactNode;
   defaultTemplate?: TemplateType;
 }) {
-  const [template, setTemplateState] = useState<TemplateType>(defaultTemplate);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem(TEMPLATE_STORAGE_KEY) as TemplateType | null;
-    if (stored) {
-      setTemplateState(stored);
-    }
-  }, []);
+  const [template, setTemplateState] = useState<TemplateType>(() => {
+    if (typeof window === 'undefined') return defaultTemplate;
+    return (localStorage.getItem(TEMPLATE_STORAGE_KEY) as TemplateType | null) || defaultTemplate;
+  });
 
   const setTemplate = (newTemplate: TemplateType) => {
     setTemplateState(newTemplate);
-    if (mounted) {
+    if (typeof window !== 'undefined') {
       localStorage.setItem(TEMPLATE_STORAGE_KEY, newTemplate);
     }
   };

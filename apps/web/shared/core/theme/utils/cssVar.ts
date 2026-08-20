@@ -14,7 +14,7 @@ import { presets, type PresetName } from '../presets';
  * Flatten nested object to CSS variable format
  */
 function flattenToCSSVars(
-  obj: Record<string, any>,
+  obj: Record<string, unknown>,
   prefix = '',
   result: Record<string, string> = {}
 ): Record<string, string> {
@@ -26,22 +26,23 @@ function flattenToCSSVars(
       
       // Handle DEFAULT key specially - use parent key name without DEFAULT suffix
       if (key === 'DEFAULT' && prefix) {
-        if (typeof value.DEFAULT !== 'undefined') {
-          result[`--${prefix}`] = String(value.DEFAULT);
+        const defaultValue = (value as Record<string, unknown>).DEFAULT;
+        if (typeof defaultValue !== 'undefined') {
+          result[`--${prefix}`] = String(defaultValue);
         }
         // Process other keys in the object
         for (const subKey in value) {
           if (subKey !== 'DEFAULT') {
-            const subValue = value[subKey];
+            const subValue = (value as Record<string, unknown>)[subKey];
             if (typeof subValue === 'object' && subValue !== null && !Array.isArray(subValue)) {
-              flattenToCSSVars(subValue, `${prefix}-${subKey}`, result);
+              flattenToCSSVars(subValue as Record<string, unknown>, `${prefix}-${subKey}`, result);
             } else {
               result[`--${prefix}-${subKey}`] = String(subValue);
             }
           }
         }
       } else {
-        flattenToCSSVars(value, newKey, result);
+        flattenToCSSVars(value as Record<string, unknown>, newKey, result);
       }
     } else {
       // Handle DEFAULT key at leaf level

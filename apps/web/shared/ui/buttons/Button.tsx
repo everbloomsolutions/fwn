@@ -51,7 +51,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={loading}
         whileHover={hoverScale}
         whileTap={tapScale}
-        {...(props as any)}
+        {...(props as Record<string, unknown>)}
       >
         {loading && (
           <svg

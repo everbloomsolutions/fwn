@@ -12,7 +12,7 @@ export interface UpdateOnboardingProfileData {
   name?: string;
   phoneNumber?: string;
   company?: string;
-  preferences?: Record<string, any>;
+  preferences?: Record<string, unknown>;
 }
 
 export interface OnboardingStatus {

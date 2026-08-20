@@ -7,7 +7,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { cn } from '@/shared/utils/cn';
 import { useColorMode } from '@/shared/core/theme/hooks/useColorMode';
 
@@ -16,7 +16,6 @@ export interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   href?: string;
   className?: string;
-  showText?: boolean;
 }
 
 // Logo dimensions: 112.03x60.51 (aspect ratio ~1.85:1)
@@ -32,17 +31,8 @@ export function Logo({
   size = 'md',
   href,
   className,
-  showText = true,
 }: LogoProps) {
   const { resolvedMode, mounted } = useColorMode();
-  const [logoVersion, setLogoVersion] = useState(0);
-  
-  // Force update when theme changes
-  useEffect(() => {
-    if (mounted && variant === 'auto') {
-      setLogoVersion(prev => prev + 1);
-    }
-  }, [resolvedMode, mounted, variant]);
   
   // Memoize logo source and key to ensure proper updates
   const { logoSrc, logoKey } = useMemo(() => {
@@ -54,7 +44,7 @@ export function Logo({
       if (mounted) {
         // When mounted, use the resolved mode
         src = resolvedMode === 'dark' ? '/logo-dark.svg' : '/logo.svg';
-        key = `logo-auto-${resolvedMode}-v${logoVersion}`;
+        key = `logo-auto-${resolvedMode}`;
       } else {
         // Before mount, default to light logo to avoid hydration mismatch
         src = '/logo.svg';
@@ -70,7 +60,7 @@ export function Logo({
     }
     
     return { logoSrc: src, logoKey: key };
-  }, [variant, resolvedMode, mounted, logoVersion]);
+  }, [variant, resolvedMode, mounted]);
 
   const dimensions = sizeMap[size];
   

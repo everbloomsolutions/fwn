@@ -79,7 +79,7 @@ export function SuggestedProducts({
       }
     }
     load();
-  }, [categorySlug, limit, excludeIds]);
+  }, [categorySlug, limit, excludeIds, categoryId]);
 
   if (products.length === 0 && !loading) return null;
 

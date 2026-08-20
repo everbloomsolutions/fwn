@@ -117,11 +117,12 @@ export function Sidebar() {
       }
     };
 
-    navRef.current.addEventListener('keydown', handleTab);
+    const nav = navRef.current;
+    nav?.addEventListener('keydown', handleTab);
     firstElement?.focus();
 
     return () => {
-      navRef.current?.removeEventListener('keydown', handleTab);
+      nav?.removeEventListener('keydown', handleTab);
     };
   }, [isMobile, isOpen]);
 
@@ -176,12 +177,10 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav 
+      <nav
         ref={navRef}
-        className="flex-1 overflow-y-auto px-3 py-4" 
+        className="flex-1 overflow-y-auto px-3 py-4"
         aria-label="Sidebar navigation"
-        role="navigation"
-        aria-orientation="vertical"
       >
         {filteredNavigation.length > 0 ? (
           <div className="space-y-1">
@@ -258,7 +257,6 @@ export function Sidebar() {
               className="fixed left-0 top-0 z-50 h-full w-64 shadow-xl will-change-[transform,opacity]"
               role="complementary"
               aria-label="Sidebar"
-              aria-modal="true"
             >
               {sidebarContent}
             </motion.aside>
