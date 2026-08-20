@@ -24,13 +24,20 @@ import { Logo } from '@/shared/ui/brand';
 import { USER_ROUTES, AUTH_ROUTES, PUBLIC_ROUTES } from '@/shared/config/routes';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { apiRequest } from '@/shared/core/http/apiClient';
-import { ShoppingCart, ChevronDown, Grid3X3, Shield, Package, ClipboardList, Tags, PlusSquare } from 'lucide-react';
+import { ShoppingCart, ChevronDown, Grid3X3, Package, ClipboardList, Tags, PlusSquare } from 'lucide-react';
 
 interface Category {
   _id: string;
   name: string;
   slug: string;
 }
+
+const adminLinks = [
+  { href: '/admin/inventory', label: 'Inventory', icon: Package },
+  { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
+  { href: '/admin/categories', label: 'Categories', icon: Tags },
+  { href: '/admin/products/new', label: 'Add Product', icon: PlusSquare },
+] as const;
 
 export function Navbar() {
   const { isAuthenticated, user } = useAuth();
@@ -40,7 +47,6 @@ export function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const [adminOpen, setAdminOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const authPage = isAuthPage(pathname);
@@ -93,14 +99,11 @@ export function Navbar() {
     label: c.name,
   }));
 
-  const adminMobileLinks = isAdmin
-    ? [
-        { href: '/admin/inventory', label: 'Inventory' },
-        { href: '/admin/orders', label: 'Orders' },
-        { href: '/admin/categories', label: 'Categories' },
-        { href: '/admin/products/new', label: 'Add Product' },
-      ]
-    : [];
+  const mobileLinks = isAdmin
+    ? adminLinks.map((l) => ({ href: l.href, label: l.label }))
+    : [...navbarNavigationLinks, ...mobileCategoryLinks];
+
+  const desktopNavLinks = isAdmin ? adminLinks : navbarNavigationLinks;
 
   return (
     <>
@@ -113,125 +116,94 @@ export function Navbar() {
 
             {showNavigationLinks && (
               <nav className="hidden md:flex flex-1 items-center justify-center gap-1" aria-label="Main navigation">
-                {navbarNavigationLinks.map((link) => {
-                  if (link.href === PUBLIC_ROUTES.SHOP) {
-                    return (
-                      <div
-                        key={link.href}
-                        className="relative"
-                        onMouseEnter={() => {
-                          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-                          setCategoriesOpen(true);
-                        }}
-                        onMouseLeave={() => {
-                          timeoutRef.current = setTimeout(() => setCategoriesOpen(false), 150);
-                        }}
-                      >
-                        <button
-                          onClick={() => setCategoriesOpen((v) => !v)}
+                {isAdmin
+                  ? adminLinks.map((link) => {
+                      const isActive =
+                        link.href === '/admin/products/new'
+                          ? pathname === link.href
+                          : isActiveRoute(pathname, link.href);
+                      const Icon = link.icon;
+                      return (
+                        <Link
+                          key={link.href}
+                          href={link.href}
                           className={cn(
-                            'inline-flex items-center gap-1 rounded-lg px-4 py-2 text-base font-medium transition',
-                            isActiveRoute(pathname, link.href)
+                            'inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-base font-medium transition',
+                            isActive
                               ? 'text-primary'
                               : 'text-text-muted hover:text-text'
                           )}
+                          aria-current={isActive ? 'page' : undefined}
                         >
-                          <span>Shop</span>
-                          <ChevronDown className={cn('h-4 w-4 transition', categoriesOpen && 'rotate-180')} />
-                        </button>
-                        {categoriesOpen && (
-                          <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-xl border border-border bg-surface p-2 shadow-xl">
-                            <Link
-                              href="/categories"
-                              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+                          <Icon className="h-4 w-4" />
+                          {link.label}
+                        </Link>
+                      );
+                    })
+                  : navbarNavigationLinks.map((link) => {
+                      if (link.href === PUBLIC_ROUTES.SHOP) {
+                        return (
+                          <div
+                            key={link.href}
+                            className="relative"
+                            onMouseEnter={() => {
+                              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                              setCategoriesOpen(true);
+                            }}
+                            onMouseLeave={() => {
+                              timeoutRef.current = setTimeout(() => setCategoriesOpen(false), 150);
+                            }}
+                          >
+                            <button
+                              onClick={() => setCategoriesOpen((v) => !v)}
+                              className={cn(
+                                'inline-flex items-center gap-1 rounded-lg px-4 py-2 text-base font-medium transition',
+                                isActiveRoute(pathname, link.href)
+                                  ? 'text-primary'
+                                  : 'text-text-muted hover:text-text'
+                              )}
                             >
-                              <Grid3X3 className="h-4 w-4" /> All Categories
-                            </Link>
-                            {categories.map((c) => (
-                              <Link
-                                key={c._id}
-                                href={`/shop?category=${c.slug}`}
-                                className="block rounded-lg px-3 py-2 text-sm text-text-muted hover:bg-surface-hover hover:text-text"
-                              >
-                                {c.name}
-                              </Link>
-                            ))}
+                              <span>Shop</span>
+                              <ChevronDown className={cn('h-4 w-4 transition', categoriesOpen && 'rotate-180')} />
+                            </button>
+                            {categoriesOpen && (
+                              <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-xl border border-border bg-surface p-2 shadow-xl">
+                                <Link
+                                  href="/categories"
+                                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+                                >
+                                  <Grid3X3 className="h-4 w-4" /> All Categories
+                                </Link>
+                                {categories.map((c) => (
+                                  <Link
+                                    key={c._id}
+                                    href={`/shop?category=${c.slug}`}
+                                    className="block rounded-lg px-3 py-2 text-sm text-text-muted hover:bg-surface-hover hover:text-text"
+                                  >
+                                    {c.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  }
+                        );
+                      }
 
-                  const isActive = isActiveRoute(pathname, link.href);
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={cn(
-                        'text-base font-medium transition-colors px-4 py-2 rounded-lg',
-                        isActive ? 'text-primary' : 'text-text-muted hover:text-text'
-                      )}
-                      aria-current={isActive ? 'page' : undefined}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
-
-                {isAdmin && (
-                  <div
-                    className="relative"
-                    onMouseEnter={() => {
-                      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-                      setAdminOpen(true);
-                    }}
-                    onMouseLeave={() => {
-                      timeoutRef.current = setTimeout(() => setAdminOpen(false), 150);
-                    }}
-                  >
-                    <button
-                      onClick={() => setAdminOpen((v) => !v)}
-                      className={cn(
-                        'inline-flex items-center gap-1 rounded-lg px-4 py-2 text-base font-medium transition',
-                        pathname.startsWith('/admin')
-                          ? 'text-primary'
-                          : 'text-text-muted hover:text-text'
-                      )}
-                    >
-                      <Shield className="h-4 w-4" />
-                      <span>Admin</span>
-                      <ChevronDown className={cn('h-4 w-4 transition', adminOpen && 'rotate-180')} />
-                    </button>
-                    {adminOpen && (
-                      <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-surface p-2 shadow-xl">
+                      const isActive = isActiveRoute(pathname, link.href);
+                      return (
                         <Link
-                          href="/admin/inventory"
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+                          key={link.href}
+                          href={link.href}
+                          className={cn(
+                            'text-base font-medium transition-colors px-4 py-2 rounded-lg',
+                            isActive ? 'text-primary' : 'text-text-muted hover:text-text'
+                          )}
+                          aria-current={isActive ? 'page' : undefined}
                         >
-                          <Package className="h-4 w-4" /> Inventory
+                          {link.label}
                         </Link>
-                        <Link
-                          href="/admin/orders"
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
-                        >
-                          <ClipboardList className="h-4 w-4" /> Orders
-                        </Link>
-                        <Link
-                          href="/admin/categories"
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
-                        >
-                          <Tags className="h-4 w-4" /> Categories
-                        </Link>
-                        <Link
-                          href="/admin/products/new"
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
-                        >
-                          <PlusSquare className="h-4 w-4" /> Add Product
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      );
+                    })}
               </nav>
             )}
 
@@ -271,14 +243,7 @@ export function Navbar() {
 
               <div className="md:hidden flex items-center gap-2">
                 <ThemeToggle variant="icon" size="sm" />
-                <MobileMenu
-                  links={[
-                    ...navbarNavigationLinks,
-                    ...mobileCategoryLinks,
-                    ...adminMobileLinks,
-                  ]}
-                  authLinks={authLinks}
-                />
+                <MobileMenu links={mobileLinks} authLinks={authLinks} />
               </div>
             </div>
           </div>
