@@ -1,10 +1,23 @@
 import type { Metadata } from 'next';
+import { Inter, Fira_Code } from 'next/font/google';
 import '@/styles/globals.css';
 import '@/styles/typography.css';
 import { ThemeProvider } from '@/shared/core/theme/ThemeProvider';
 import { ToastProvider } from '@/shared/ui/feedback/ToastProvider';
 import { ThemeColorMeta } from '@/shared/ui/layout/ThemeColorMeta';
 import { SkipToContent } from '@/shared/ui/layout/SkipToContent';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const firaCode = Fira_Code({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://foodworldnaturals.com';
 
@@ -78,15 +91,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${firaCode.variable}`} suppressHydrationWarning>
       <head>
-        {/* Google Fonts - Inter and Fira Code */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -110,7 +116,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body className={inter.className}>
         <SkipToContent />
         <ThemeProvider defaultTemplate="default">
           <ThemeColorMeta />
