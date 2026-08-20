@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
-import { Heading, Text, Button } from '@/shared/ui';
+import { Container, Heading, Text, Button } from '@/shared/ui';
 import { Loader2 } from 'lucide-react';
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
@@ -56,14 +56,16 @@ export default function MyOrdersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <Container maxWidth="xl" className="py-16">
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Container>
     );
   }
 
   return (
-    <div>
+    <Container maxWidth="xl" className="py-6 sm:py-12">
       <Heading level="h2" size="compact" balance className="mb-6">
         My Orders
       </Heading>
@@ -118,6 +120,6 @@ export default function MyOrdersPage() {
           ))}
         </div>
       )}
-    </div>
+    </Container>
   );
 }

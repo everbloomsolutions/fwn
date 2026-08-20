@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProfileCompletionForm } from '@/modules/onboarding/components/ProfileCompletionForm';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
-import { PUBLIC_ROUTES } from '@/shared/config/routes';
+import { getPostLoginRedirect } from '@/modules/auth/utils/getPostLoginRedirect';
 import { useOnboarding } from '@/modules/onboarding/hooks/useOnboarding';
 
 export default function OnboardingProfilePage() {
@@ -38,7 +38,7 @@ export default function OnboardingProfilePage() {
     // Only redirect if BOTH indicate completion (defensive check)
     if (statusOnboardingCompleted && userOnboardingCompleted && status) {
       hasRedirected.current = true;
-      router.push(PUBLIC_ROUTES.SERVICES);
+      router.push(getPostLoginRedirect(user));
     }
   }, [isAuthenticated, authLoading, isCompleted, onboardingLoading, status, user, router]);
 

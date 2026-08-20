@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { RegisterForm } from '@/modules/auth/components/RegisterForm';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
-import { PUBLIC_ROUTES, AUTH_ROUTES } from '@/shared/config/routes';
+import { AUTH_ROUTES, PUBLIC_ROUTES } from '@/shared/config/routes';
+import { getPostLoginRedirect } from '@/modules/auth/utils/getPostLoginRedirect';
 import { Logo } from '@/shared/ui/brand';
 import { motion } from 'framer-motion';
 import { brandConfig } from '@/shared/brand';
@@ -13,13 +14,13 @@ import { Sparkles, Shield, Zap } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push(PUBLIC_ROUTES.SERVICES);
+      router.push(getPostLoginRedirect(user));
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, user, router]);
 
   return (
     <div className="min-h-screen flex">

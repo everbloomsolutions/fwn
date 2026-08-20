@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { getOAuthCallbackParams } from '@/modules/auth/services/oauthService';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { User } from '@/modules/auth/stores/authStore';
-import { AUTH_ROUTES, PUBLIC_ROUTES, ONBOARDING_ROUTES } from '@/shared/config/routes';
+import { AUTH_ROUTES } from '@/shared/config/routes';
+import { getPostLoginRedirect } from '@/modules/auth/utils/getPostLoginRedirect';
 import { logger } from '@/shared/utils/logger';
 
 export default function OAuthCallbackPage() {
@@ -53,16 +54,9 @@ export default function OAuthCallbackPage() {
           // Wait a bit longer to ensure cookie is set before redirect
           // Use window.location for full page reload to ensure middleware sees the cookie
           setTimeout(() => {
-            // Redirect to onboarding for new users, otherwise to profile
-            if (isNewUser) {
-              logger.info('OAuth Callback - Redirecting new user to onboarding');
-              window.location.href = ONBOARDING_ROUTES.WELCOME;
-            } else {
-              // For existing users, redirect to services page
-              logger.info('OAuth Callback - Existing user, redirecting to SERVICES');
-              logger.info('OAuth Callback - User onboardingCompleted:', user.onboardingCompleted);
-              window.location.href = PUBLIC_ROUTES.SERVICES;
-            }
+            const redirect = getPostLoginRedirect(user, { isNewUser });
+            logger.info(`OAuth Callback - Redirecting to ${redirect}`);
+            window.location.href = redirect;
           }, 200);
         }, 0);
       } catch {

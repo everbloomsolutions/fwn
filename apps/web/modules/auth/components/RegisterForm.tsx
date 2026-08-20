@@ -8,7 +8,8 @@ import { useAuth } from '../hooks/useAuth';
 import { register as registerService } from '../services/authService';
 import { registerSchema } from '../schemas/authSchema';
 import { OAuthButtons } from './OAuthButtons';
-import { PUBLIC_ROUTES, ONBOARDING_ROUTES } from '@/shared/config/routes';
+import { PUBLIC_ROUTES } from '@/shared/config/routes';
+import { getPostLoginRedirect } from '../utils/getPostLoginRedirect';
 import { motion } from 'framer-motion';
 import { UserPlus, Mail, Lock, User, ArrowRight } from 'lucide-react';
 
@@ -40,13 +41,8 @@ export function RegisterForm() {
 
       const response = await registerService(validated);
       setAuth(response.user, response.token, response.refreshToken);
-      
-      // Redirect to onboarding for new users, otherwise to services
-      if (response.isNewUser) {
-        router.push(ONBOARDING_ROUTES.WELCOME);
-      } else {
-        router.push(PUBLIC_ROUTES.SERVICES);
-      }
+
+      router.push(getPostLoginRedirect(response.user, { isNewUser: response.isNewUser }));
     } catch (error) {
       setIsSubmitting(false);
       setLoading(false);

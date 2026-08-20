@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { WelcomeScreen } from '@/modules/onboarding/components/WelcomeScreen';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
-import { PUBLIC_ROUTES } from '@/shared/config/routes';
+import { getPostLoginRedirect } from '@/modules/auth/utils/getPostLoginRedirect';
 import { useOnboarding } from '@/modules/onboarding/hooks/useOnboarding';
 import { logger } from '@/shared/utils/logger';
 
@@ -56,9 +56,10 @@ export default function OnboardingWelcomePage() {
     // Only redirect if BOTH indicate completion (defensive check)
     // Must have status object and both must be true
     if (status && statusOnboardingCompleted && userOnboardingCompleted) {
-      logger.info('[Onboarding Welcome] Onboarding completed, redirecting to services');
+      const redirect = getPostLoginRedirect(user);
+      logger.info(`[Onboarding Welcome] Onboarding completed, redirecting to ${redirect}`);
       hasRedirected.current = true;
-      router.push(PUBLIC_ROUTES.SERVICES);
+      router.push(redirect);
     } else {
       logger.info('[Onboarding Welcome] Onboarding not completed, will show welcome screen');
     }

@@ -9,7 +9,8 @@ import { useAuth } from '../hooks/useAuth';
 import { login as loginService } from '../services/authService';
 import { loginSchema, type LoginFormData } from '../schemas/authSchema';
 import { OAuthButtons } from './OAuthButtons';
-import { PUBLIC_ROUTES, AUTH_ROUTES } from '@/shared/config/routes';
+import { AUTH_ROUTES, PUBLIC_ROUTES } from '@/shared/config/routes';
+import { getPostLoginRedirect } from '../utils/getPostLoginRedirect';
 import { motion } from 'framer-motion';
 import { Mail, Lock, LogIn, ArrowRight } from 'lucide-react';
 
@@ -32,7 +33,7 @@ export function LoginForm() {
     try {
       const response = await loginService(data);
       setAuth(response.user, response.token, response.refreshToken);
-      router.push(PUBLIC_ROUTES.SERVICES);
+      router.push(getPostLoginRedirect(response.user));
     } catch (error) {
       setLoading(false);
       const message = error instanceof Error ? error.message : 'Login failed. Please try again.';

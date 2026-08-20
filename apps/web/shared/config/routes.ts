@@ -4,6 +4,15 @@
  * Use these constants instead of hardcoded strings throughout the application
  */
 
+// Admin routes (authenticated admin)
+export const ADMIN_ROUTES = {
+  DASHBOARD: '/admin/inventory',
+  INVENTORY: '/admin/inventory',
+  PRODUCTS: '/admin/products',
+  ORDERS: '/admin/orders',
+  CATEGORIES: '/admin/categories',
+} as const;
+
 // Public routes
 export const PUBLIC_ROUTES = {
   HOME: '/',
