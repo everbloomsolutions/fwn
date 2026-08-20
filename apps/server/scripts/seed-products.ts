@@ -18,12 +18,12 @@ const sampleCategories = [
 ];
 
 const sampleProducts = [
-  { sku: 'FWN-CP-001', name: 'Cold-Pressed Groundnut Oil', slug: 'cold-pressed-groundnut-oil', category: 'cold-pressed-oils', price: 420, unit: '1L', stock: 50, images: ['https://images.unsplash.com/photo-1474979266404-7caddbed54e6?w=800&h=600&fit=crop'], tags: ['oil', 'groundnut', 'cold-pressed'], ingredients: ['Groundnuts'], certifications: ['FSSAI'] },
-  { sku: 'FWN-CP-002', name: 'Cold-Pressed Sesame Oil', slug: 'cold-pressed-sesame-oil', category: 'cold-pressed-oils', price: 380, unit: '500ml', stock: 40, images: ['https://images.unsplash.com/photo-1607603756572-7d7f0e6e91d3?w=800&h=600&fit=crop'], tags: ['oil', 'sesame', 'cold-pressed'], ingredients: ['Sesame seeds'], certifications: ['FSSAI'] },
-  { sku: 'FWN-HO-001', name: 'Raw Wildflower Honey', slug: 'raw-wildflower-honey', category: 'organic-honey', price: 650, unit: '500g', stock: 80, images: ['https://images.unsplash.com/photo-1587049352846-4a222e112d90?w=800&h=600&fit=crop'], tags: ['honey', 'raw', 'organic'], ingredients: ['Honey'], certifications: ['FSSAI'] },
-  { sku: 'FWN-SP-001', name: 'Garam Masala Whole Spices', slug: 'garam-masala-whole-spices', category: 'whole-spices', price: 220, unit: '250g', stock: 100, images: ['https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&h=600&fit=crop'], tags: ['spices', 'masala', 'whole'], ingredients: ['Cinnamon, cloves, cardamom, pepper, cumin'], certifications: ['FSSAI'] },
-  { sku: 'FWN-GR-001', name: 'Sonamasuri Brown Rice', slug: 'sonamasuri-brown-rice', category: 'grains-pulses', price: 180, unit: '1kg', stock: 120, images: ['https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&h=600&fit=crop'], tags: ['rice', 'brown', 'grains'], ingredients: ['Brown rice'], certifications: ['FSSAI'] },
-  { sku: 'FWN-SW-001', name: 'Organic Jaggery Blocks', slug: 'organic-jaggery-blocks', category: 'natural-sweeteners', price: 140, unit: '500g', stock: 60, images: ['https://images.unsplash.com/photo-1622484212850-eb936d1f3644?w=800&h=600&fit=crop'], tags: ['jaggery', 'sweetener', 'organic'], ingredients: ['Sugarcane juice'], certifications: ['FSSAI'] },
+  { sku: 'FWN-CP-001', name: 'Cold-Pressed Groundnut Oil', slug: 'cold-pressed-groundnut-oil', category: 'cold-pressed-oils', price: 420, unit: '1L', stock: 50, measurement: 'ltr', quantity: 1, images: ['https://images.unsplash.com/photo-1474979266404-7caddbed54e6?w=800&h=600&fit=crop'], tags: ['oil', 'groundnut', 'cold-pressed'], ingredients: ['Groundnuts'], certifications: ['FSSAI'] },
+  { sku: 'FWN-CP-002', name: 'Cold-Pressed Sesame Oil', slug: 'cold-pressed-sesame-oil', category: 'cold-pressed-oils', price: 380, unit: '500ml', stock: 40, measurement: 'ml', quantity: 500, images: ['https://images.unsplash.com/photo-1607603756572-7d7f0e6e91d3?w=800&h=600&fit=crop'], tags: ['oil', 'sesame', 'cold-pressed'], ingredients: ['Sesame seeds'], certifications: ['FSSAI'] },
+  { sku: 'FWN-HO-001', name: 'Raw Wildflower Honey', slug: 'raw-wildflower-honey', category: 'organic-honey', price: 650, unit: '500g', stock: 80, measurement: 'g', quantity: 500, images: ['https://images.unsplash.com/photo-1587049352846-4a222e112d90?w=800&h=600&fit=crop'], tags: ['honey', 'raw', 'organic'], ingredients: ['Honey'], certifications: ['FSSAI'] },
+  { sku: 'FWN-SP-001', name: 'Garam Masala Whole Spices', slug: 'garam-masala-whole-spices', category: 'whole-spices', price: 220, unit: '250g', stock: 100, measurement: 'g', quantity: 250, images: ['https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&h=600&fit=crop'], tags: ['spices', 'masala', 'whole'], ingredients: ['Cinnamon, cloves, cardamom, pepper, cumin'], certifications: ['FSSAI'] },
+  { sku: 'FWN-GR-001', name: 'Sonamasuri Brown Rice', slug: 'sonamasuri-brown-rice', category: 'grains-pulses', price: 180, unit: '1kg', stock: 120, measurement: 'kg', quantity: 1, images: ['https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&h=600&fit=crop'], tags: ['rice', 'brown', 'grains'], ingredients: ['Brown rice'], certifications: ['FSSAI'] },
+  { sku: 'FWN-SW-001', name: 'Organic Jaggery Blocks', slug: 'organic-jaggery-blocks', category: 'natural-sweeteners', price: 140, unit: '500g', stock: 60, measurement: 'g', quantity: 500, images: ['https://images.unsplash.com/photo-1622484212850-eb936d1f3644?w=800&h=600&fit=crop'], tags: ['jaggery', 'sweetener', 'organic'], ingredients: ['Sugarcane juice'], certifications: ['FSSAI'] },
 ];
 
 const seedProducts = async (): Promise<void> => {
@@ -54,11 +54,23 @@ const seedProducts = async (): Promise<void> => {
         continue;
       }
 
+      const { unit, measurement, quantity, ...rest } = prod;
+      const variant = {
+        sku: prod.sku,
+        measurement,
+        quantity,
+        price: prod.price,
+        stock: prod.stock,
+        isActive: true,
+        position: 0,
+      };
+
       await Product.create({
-        ...prod,
+        ...rest,
         description: `${prod.name} is a premium natural product sourced responsibly for your healthy lifestyle.`,
         category: categoryId,
         isActive: true,
+        variants: [variant],
         nutrition: { energy: '120 kcal', protein: '2g', fat: '10g', carbs: '5g' },
       });
       logger.info(`Created product: ${prod.name}`);

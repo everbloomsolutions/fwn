@@ -20,7 +20,7 @@ export const getProducts = async (
       maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
       unit: req.query.unit as string | undefined,
       inStock: req.query.inStock === 'true',
-      isBestSeller: req.query.isBestSeller === 'true',
+      isBestSeller: req.query.isBestSeller !== undefined ? req.query.isBestSeller === 'true' : undefined,
       sort: (req.query.sort as productService.GetProductsFilters['sort']) || undefined,
       limit: req.query.limit ? Math.min(Number(req.query.limit), 100) : undefined,
     };
