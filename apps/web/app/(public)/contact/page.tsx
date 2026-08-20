@@ -2,10 +2,8 @@
 
 import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import dynamic from 'next/dynamic';
 import { Container, Card, CardContent, CardHeader, CardTitle, ContactFormSection, Heading, Text, BackToTop } from '@/shared/ui';
 
-const OfficeLocationMap = dynamic(() => import('@/shared/ui/maps/OfficeLocationMap').then((m) => m.OfficeLocationMap), { ssr: false });
 import { Mail, Phone, MapPin, Clock, MessageSquare } from 'lucide-react';
 import { submitContactForm } from '@/modules/contact/services/contactService';
 import type { ContactFormData } from '@/shared/ui/sections/ContactFormSection';
@@ -15,8 +13,6 @@ import { logger } from '@/shared/utils/logger';
 import { motion } from 'framer-motion';
 import { brandConfig } from '@/shared/brand';
 
-// Office location coordinates (Madeenaguda, Hyderabad)
-const OFFICE_COORDINATES: [number, number] = [78.373, 17.495]; // [longitude, latitude]
 const OFFICE_ADDRESS = '202, Grecious Homes, Lane Number 1, Mythri Nagar, Madeenaguda, Hyderabad 500049';
 
 export default function ContactPage() {
@@ -286,14 +282,25 @@ export default function ContactPage() {
             className="w-full"
           >
             <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <div className="h-[400px] md:h-[500px] lg:h-[600px] w-full">
-                  <OfficeLocationMap
-                    coordinates={OFFICE_COORDINATES}
-                    address={OFFICE_ADDRESS}
-                    zoom={16}
-                    className="h-full w-full"
-                  />
+              <CardContent className="p-6 md:p-8">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div className="space-y-2">
+                    <Heading level="h3" size="compact" className="text-xl">
+                      Office Address
+                    </Heading>
+                    <Text className="max-w-xl text-text-muted">
+                      {OFFICE_ADDRESS}
+                    </Text>
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(OFFICE_ADDRESS)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-text-inverse hover:bg-primary-hover"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    Open in Maps
+                  </a>
                 </div>
               </CardContent>
             </Card>

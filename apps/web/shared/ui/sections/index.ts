@@ -32,9 +32,6 @@ export type { PricingSectionProps, PricingTier } from './PricingSection';
 export { ContactFormSection } from './ContactFormSection';
 export type { ContactFormSectionProps, ContactFormData } from './ContactFormSection';
 
-export { ClientShowcaseSection } from './ClientShowcaseSection';
-export type { ClientShowcaseSectionProps } from './ClientShowcaseSection';
-
 export { StatsSection } from './StatsSection';
 export type { StatsSectionProps, Stat } from './StatsSection';
 
@@ -47,6 +44,4 @@ export { PricingSection as Pricing } from './PricingSection';
 export type { PricingSectionProps as PricingProps } from './PricingSection';
 export { ContactFormSection as ContactForm } from './ContactFormSection';
 export type { ContactFormSectionProps as ContactFormProps } from './ContactFormSection';
-export { ClientShowcaseSection as ClientShowcaseHero } from './ClientShowcaseSection';
-export type { ClientShowcaseSectionProps as ClientShowcaseHeroProps } from './ClientShowcaseSection';
 

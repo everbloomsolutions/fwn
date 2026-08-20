@@ -5,8 +5,6 @@
 /* Import consolidated theme variables */
 @import './theme.css';
 
-/* Import Mapbox styles */
-@import './mapbox.css';
 
 * {
   box-sizing: border-box;

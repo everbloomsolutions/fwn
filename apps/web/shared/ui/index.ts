@@ -95,12 +95,6 @@ export type { ResponsiveTableProps, TableColumn } from './tables/ResponsiveTable
 export { OptimizedImage } from './media/OptimizedImage';
 export type { OptimizedImageProps } from './media/OptimizedImage';
 
-// Maps
-export { MapboxMap } from './maps/MapboxMap';
-export type { MapboxMapProps } from './maps/MapboxMap';
-export { OfficeLocationMap } from './maps/OfficeLocationMap';
-export type { OfficeLocationMapProps } from './maps/OfficeLocationMap';
-
 // Sections
 export * from './sections';
 

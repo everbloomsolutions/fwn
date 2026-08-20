@@ -5,8 +5,7 @@ if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'test';
 }
 
-// Polyfill for TextDecoder/TextEncoder (needed for mapbox-gl in tests)
-// MUST be set up BEFORE any other code runs, including jest.mock() calls
+// Polyfill for TextDecoder/TextEncoder in jsdom
 // Always polyfill in jsdom environment (it doesn't have TextDecoder/TextEncoder)
 try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -47,15 +46,6 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: jest.fn(),
   })),
 });
-
-// Mock mapbox-gl before any imports (jest.mock is hoisted, but polyfill is already set)
-jest.mock('mapbox-gl', () => ({
-  Map: jest.fn(),
-  Marker: jest.fn(),
-  Popup: jest.fn(),
-  NavigationControl: jest.fn(),
-  GeolocateControl: jest.fn(),
-}));
 
 // Mock Next.js 15 App Router navigation
 // This global mock applies to all tests and bypasses the "invariant expected app router to be mounted" error
