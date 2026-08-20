@@ -318,17 +318,8 @@ export default function ProductForm({ product, categories, isEdit }: { product?:
           {form.variants.map((variant, idx) => (
             <div
               key={idx}
-              className="grid gap-3 rounded-xl border border-border bg-bg p-3 sm:grid-cols-7"
+              className="grid gap-3 rounded-xl border border-border bg-bg p-3 sm:grid-cols-6"
             >
-              <div className="sm:col-span-2">
-                <label className="mb-1 block text-xs font-medium">SKU</label>
-                <input
-                  required
-                  value={variant.sku}
-                  onChange={(e) => setVariant(idx, 'sku', e.target.value)}
-                  className="w-full rounded-lg border border-border px-2 py-1.5 text-sm"
-                />
-              </div>
               <div>
                 <label className="mb-1 block text-xs font-medium">Qty</label>
                 <input
@@ -377,8 +368,8 @@ export default function ProductForm({ product, categories, isEdit }: { product?:
                   className="w-full rounded-lg border border-border px-2 py-1.5 text-sm"
                 />
               </div>
-              <div className="flex items-end gap-2 sm:col-span-2">
-                <label className="mb-1 flex items-center gap-1 text-sm sm:absolute sm:mb-0 sm:mt-1">
+              <div className="flex items-end gap-3 sm:col-span-2">
+                <label className="mb-1 flex h-9 items-center gap-2 text-sm">
                   <input
                     type="checkbox"
                     checked={variant.isActive}
@@ -391,12 +382,17 @@ export default function ProductForm({ product, categories, isEdit }: { product?:
                   <button
                     type="button"
                     onClick={() => removeVariant(idx)}
-                    className="ml-auto text-status-error hover:text-status-error/80"
+                    className="ml-auto inline-flex h-9 items-center justify-center rounded-lg border border-border bg-surface p-2 text-status-error hover:bg-surface-hover"
                     title="Remove variant"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 )}
+              </div>
+              <div className="sm:col-span-6">
+                <Text className="text-xs text-text-muted">
+                  Generated SKU: <span className="font-mono text-text">{variant.sku}</span>
+                </Text>
               </div>
             </div>
           ))}

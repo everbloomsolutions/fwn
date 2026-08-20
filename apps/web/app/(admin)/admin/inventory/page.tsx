@@ -6,7 +6,7 @@ import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Heading, Text, Button } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/layout';
-import { Loader2, Search, ChevronLeft, ChevronRight, AlertTriangle, Plus, Minus } from 'lucide-react';
+import { Loader2, Search, ChevronLeft, ChevronRight, AlertTriangle, Plus, Minus, Pencil } from 'lucide-react';
 
 interface Variant {
   _id: string;
@@ -248,9 +248,9 @@ export default function AdminInventoryPage() {
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/admin/products/${product._id}/edit`}
-                      className="text-sm font-medium text-primary hover:text-primary-hover"
+                      className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
                     >
-                      Edit
+                      <Pencil className="h-4 w-4" /> Edit
                     </Link>
                     <Button
                       size="sm"
