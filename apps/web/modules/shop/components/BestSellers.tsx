@@ -1,13 +1,9 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { apiRequest } from '@/shared/core/http/apiClient';
-import { API_ENDPOINTS } from '@/shared/config/api';
 import { ProductCard } from './ProductCard';
-import { Heading, Text } from '@/shared/ui';
-import { Loader2 } from 'lucide-react';
+import { Heading } from '@/shared/ui';
 import { cn } from '@/shared/utils/cn';
+import { API_ENDPOINTS } from '@/shared/config/api';
+import { getEnv } from '@/shared/types/env';
 
 interface ProductVariant {
   _id: string;
@@ -28,46 +24,22 @@ interface Product {
   variants: ProductVariant[];
 }
 
-interface ProductResponse {
-  success: boolean;
-  data: Product[];
-}
-
 interface BestSellersProps {
   limit?: number;
 }
 
-export function BestSellers({ limit = 10 }: BestSellersProps) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+async function getBestSellers(limit: number): Promise<Product[]> {
+  const res = await fetch(
+    `${getEnv().NEXT_PUBLIC_API_URL}${API_ENDPOINTS.products.LIST}?isBestSeller=true&sort=best_selling&limit=${limit}`,
+    { cache: 'no-store' }
+  );
+  if (!res.ok) return [];
+  const json = await res.json();
+  return json?.data || [];
+}
 
-  useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true);
-        const response = await apiRequest<ProductResponse>({
-          method: 'GET',
-          url: `${API_ENDPOINTS.products.LIST}?isBestSeller=true&sort=best_selling&limit=${limit}`,
-        });
-        setProducts(response.data);
-      } catch {
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [limit]);
-
-  if (loading) {
-    return (
-      <section className="mt-12 sm:mt-16">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </section>
-    );
-  }
+export async function BestSellers({ limit = 10 }: BestSellersProps) {
+  const products = await getBestSellers(limit);
 
   if (products.length === 0) return null;
 

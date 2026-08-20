@@ -7,7 +7,7 @@ import { useToast, Text } from '@/shared/ui';
 import { useCartStore } from '@/modules/shop/stores/cartStore';
 import { PUBLIC_ROUTES } from '@/shared/config/routes';
 import { cn } from '@/shared/utils/cn';
-import { ShoppingCart, Heart, Star, Check, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Star, Check, Plus, Minus } from 'lucide-react';
 
 export interface ProductVariant {
   _id: string;
@@ -32,7 +32,8 @@ export function ProductCard({ product }: { product: ProductCardProps }) {
   const { success, error: showError } = useToast();
   const addItem = useCartStore((state) => state.addItem);
   const activeVariants = product.variants.filter((v) => v.isActive !== false);
-  const [selectedUnit, setSelectedUnit] = useState<string>(activeVariants[0]?.unit || product.variants[0]?.unit);
+  const inStockVariant = activeVariants.find((v) => v.stock > 0);
+  const [selectedUnit, setSelectedUnit] = useState<string>(inStockVariant?.unit || activeVariants[0]?.unit || product.variants[0]?.unit);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -68,16 +69,6 @@ export function ProductCard({ product }: { product: ProductCardProps }) {
             className="object-cover transition-transform duration-500 group-hover:scale-110"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              // Wishlist stub
-            }}
-            className="absolute right-2 top-2 rounded-full bg-surface/90 p-2 text-text-muted transition hover:text-primary"
-            aria-label="Add to wishlist"
-          >
-            <Heart className="h-4 w-4" />
-          </button>
           {!hasStock && (
             <span className="absolute left-2 top-2 rounded-full bg-error/90 px-2 py-1 text-[10px] font-medium text-white">
               Out of stock

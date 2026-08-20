@@ -40,6 +40,9 @@ coverage/
 # Downloaded product images
 apps/web/public/images/products/
 
+# TypeScript
+*.tsbuildinfo
+
 # Prisma
 prisma/migrations/
 

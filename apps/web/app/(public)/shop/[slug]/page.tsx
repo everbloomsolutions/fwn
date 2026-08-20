@@ -67,7 +67,8 @@ export default function ProductDetailPage() {
         const prod = response.data;
         setProduct(prod);
         const active = prod.variants.filter((v) => v.isActive !== false);
-        setSelectedUnit(active[0]?.unit || prod.variants[0]?.unit);
+        const inStock = active.find((v) => v.stock > 0);
+        setSelectedUnit(inStock?.unit || active[0]?.unit || prod.variants[0]?.unit);
       } catch (err) {
         showError('Failed to load product', err instanceof Error ? err.message : 'Unknown error');
       } finally {

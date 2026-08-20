@@ -22,7 +22,7 @@ export const getProducts = async (
       inStock: req.query.inStock === 'true',
       isBestSeller: req.query.isBestSeller === 'true',
       sort: (req.query.sort as productService.GetProductsFilters['sort']) || undefined,
-      limit: req.query.limit ? Number(req.query.limit) : undefined,
+      limit: req.query.limit ? Math.min(Number(req.query.limit), 100) : undefined,
     };
     const products = await productService.getProducts(filters);
     res.status(200).json({ success: true, data: products });

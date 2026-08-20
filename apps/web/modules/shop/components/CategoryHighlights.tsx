@@ -1,23 +1,15 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { apiRequest } from '@/shared/core/http/apiClient';
-import { API_ENDPOINTS } from '@/shared/config/api';
 import { Heading, Text } from '@/shared/ui';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { API_ENDPOINTS } from '@/shared/config/api';
+import { getEnv } from '@/shared/types/env';
 
 interface Category {
   _id: string;
   name: string;
   slug: string;
   description?: string;
-}
-
-interface CategoryResponse {
-  success: boolean;
-  data: Category[];
 }
 
 const categoryImages: Record<string, string> = {
@@ -29,26 +21,19 @@ const categoryImages: Record<string, string> = {
   'honey-jaggery': 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600&h=400&fit=crop',
 };
 
-export function CategoryHighlights() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+async function getCategories(): Promise<Category[]> {
+  const res = await fetch(`${getEnv().NEXT_PUBLIC_API_URL}${API_ENDPOINTS.categories.LIST}`, {
+    cache: 'no-store',
+  });
+  if (!res.ok) return [];
+  const json = await res.json();
+  return json?.data || [];
+}
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const response = await apiRequest<CategoryResponse>({
-          method: 'GET',
-          url: API_ENDPOINTS.categories.LIST,
-        });
-        setCategories(response.data);
-      } catch {
-        setCategories([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
+export async function CategoryHighlights() {
+  const categories = await getCategories();
+
+  if (categories.length === 0) return null;
 
   return (
     <section className="py-8 sm:py-12">
@@ -56,43 +41,37 @@ export function CategoryHighlights() {
         Shop by Category
       </Heading>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => (
-            <Link
-              key={category._id}
-              href={`/shop?category=${category.slug}`}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-surface transition hover:shadow-lg"
-            >
-              <div className="relative aspect-[3/2] w-full overflow-hidden">
-                <Image
-                  src={categoryImages[category.slug] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=400&fit=crop'}
-                    alt={category.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-4 sm:p-5">
-                  <h3 className="text-lg font-semibold text-white sm:text-xl">{category.name}</h3>
-                  {category.description && (
-                    <Text className="mt-1 text-sm text-white/80" lineClamp={2}>
-                      {category.description}
-                    </Text>
-                  )}
-                  <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-white">
-                    Shop now <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
-                </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {categories.map((category) => (
+          <Link
+            key={category._id}
+            href={`/shop?category=${category.slug}`}
+            className="group relative overflow-hidden rounded-2xl border border-border bg-surface transition hover:shadow-lg"
+          >
+            <div className="relative aspect-[3/2] w-full overflow-hidden">
+              <Image
+                src={categoryImages[category.slug] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=400&fit=crop'}
+                alt={category.name}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 p-4 sm:p-5">
+                <h3 className="text-lg font-semibold text-white sm:text-xl">{category.name}</h3>
+                {category.description && (
+                  <Text className="mt-1 text-sm text-white/80" lineClamp={2}>
+                    {category.description}
+                  </Text>
+                )}
+                <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-white">
+                  Shop now <ArrowRight className="h-3.5 w-3.5" />
+                </span>
               </div>
-            </Link>
-          ))}
-        </div>
-      )}
+            </div>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }

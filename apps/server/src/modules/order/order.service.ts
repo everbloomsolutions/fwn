@@ -218,10 +218,28 @@ export const getOrderByNumberAndPhone = async (orderNumber: string, phone: strin
   return await Order.findOne({ orderNumber, 'shippingAddress.phone': phone }).exec();
 };
 
+const validOrderStatusTransitions: Record<IOrder['status'], IOrder['status'][]> = {
+  pending: ['paid', 'shipped', 'cancelled'],
+  paid: ['shipped', 'cancelled'],
+  shipped: ['delivered', 'cancelled'],
+  delivered: [],
+  cancelled: [],
+};
+
 export const updateOrderStatus = async (
   id: string,
   data: { status?: IOrder['status']; paymentStatus?: IOrder['paymentStatus'] }
 ): Promise<IOrder | null> => {
+  const existing = await Order.findById(id).exec();
+  if (!existing) return null;
+
+  if (data.status && data.status !== existing.status) {
+    const allowed = validOrderStatusTransitions[existing.status] || [];
+    if (!allowed.includes(data.status)) {
+      throw new Error(`Cannot change order status from ${existing.status} to ${data.status}`);
+    }
+  }
+
   const order = await Order.findByIdAndUpdate(id, { $set: data }, { new: true }).exec();
   if (order && data.status === 'cancelled') {
     for (const item of order.items) {
@@ -234,8 +252,10 @@ export const updateOrderStatus = async (
         product.stock += item.quantity;
       }
       product.stock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+      product.salesCount = Math.max(0, product.salesCount - item.quantity);
       await product.save();
     }
+    await updateTopBestSellers().catch((err) => logger.warn('Failed to update best sellers:', err));
   }
   return order;
 };
