@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { ProductImage } from '@/modules/shop/components/ProductImage';
 import { PUBLIC_ROUTES } from '@/shared/config/routes';
 import { Container, Heading, Text, Card, CardContent, BackToTop } from '@/shared/ui';
 import { useToast } from '@/shared/ui';
@@ -109,11 +109,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-bg-muted">
-          <Image
-            src={product.images[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=800&fit=crop'}
+          <ProductImage
+            src={product.images[0]}
             alt={product.name}
             fill
-            className="object-cover"
             sizes="(max-width: 1024px) 100vw, 50vw"
             priority
           />

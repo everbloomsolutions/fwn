@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useToast, Text } from '@/shared/ui';
+import { ProductImage } from '@/modules/shop/components/ProductImage';
 import { useCartStore } from '@/modules/shop/stores/cartStore';
 import { PUBLIC_ROUTES } from '@/shared/config/routes';
 import { cn } from '@/shared/utils/cn';
@@ -62,11 +62,11 @@ export function ProductCard({ product }: { product: ProductCardProps }) {
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-surface p-3 transition-all hover:shadow-lg hover:-translate-y-1">
       <Link href={PUBLIC_ROUTES.PRODUCT(product.slug)} className="block">
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-bg-muted">
-          <Image
-            src={product.images[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=600&fit=crop'}
+          <ProductImage
+            src={product.images[0]}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="transition-transform duration-500 group-hover:scale-110"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           {!hasStock && (

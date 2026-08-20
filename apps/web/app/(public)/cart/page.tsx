@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { ProductImage } from '@/modules/shop/components/ProductImage';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Container, Heading, Text, Card, CardContent, BackToTop } from '@/shared/ui';
@@ -75,13 +75,12 @@ export default function CartPage() {
           {items.map((item) => (
             <Card key={item.variantId} className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-bg-muted">
-                <Image
-                  src={item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=200&fit=crop'}
-                  alt={item.name}
-                  fill
-                  className="object-cover"
-                  sizes="96px"
-                />
+                <ProductImage
+                src={item.image}
+                alt={item.name}
+                fill
+                sizes="96px"
+              />
               </div>
 
               <div className="flex-1">
