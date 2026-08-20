@@ -36,7 +36,7 @@ const adminLinks = [
   { href: '/admin/inventory', label: 'Inventory', icon: Package },
   { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
   { href: '/admin/categories', label: 'Categories', icon: Tags },
-  { href: '/admin/products/new', label: 'Add Product', icon: PlusSquare },
+  { href: '/admin/products', label: 'Products', icon: PlusSquare },
 ] as const;
 
 export function Navbar() {
@@ -119,7 +119,7 @@ export function Navbar() {
                 {isAdmin
                   ? adminLinks.map((link) => {
                       const isActive =
-                        link.href === '/admin/products/new'
+                        link.href === '/admin/products'
                           ? pathname === link.href
                           : isActiveRoute(pathname, link.href);
                       const Icon = link.icon;
