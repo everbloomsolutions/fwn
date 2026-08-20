@@ -12,6 +12,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:api": "tsx scripts/test-api-client.ts",
+    "analyze": "ANALYZE=true pnpm build",
     "optimize:hero": "node scripts/optimize-hero-images.js",
     "optimize:services": "node scripts/optimize-service-images.js",
     "clean": "rm -rf .next .turbo coverage out"
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",
+    "@next/bundle-analyzer": "^16.3.1",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.2",

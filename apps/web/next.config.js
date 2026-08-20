@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig = {
   // Set workspace root to silence Next.js warning about multiple lockfiles
   // This tells Next.js where the actual workspace root is (two levels up)
@@ -40,5 +44,5 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);
 
