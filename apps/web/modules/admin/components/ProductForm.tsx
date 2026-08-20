@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
@@ -42,6 +42,12 @@ interface Product {
 
 const MEASUREMENTS: ProductVariant['measurement'][] = ['g', 'kg', 'ml', 'ltr', 'pcs', 'unit'];
 
+function generateVariantSKU(baseSku: string, quantity: number, measurement: string) {
+  const clean = baseSku.trim();
+  if (!clean || !quantity || !measurement) return '';
+  return `${clean}-${quantity}${measurement}`;
+}
+
 function emptyProduct(): Product {
   return {
     sku: '',
@@ -75,6 +81,17 @@ export default function ProductForm({ product, categories, isEdit }: { product?:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!form.sku) return;
+    setForm((f) => ({
+      ...f,
+      variants: f.variants.map((v) => ({
+        ...v,
+        sku: generateVariantSKU(f.sku, v.quantity, v.measurement),
+      })),
+    }));
+  }, [form.sku]);
+
   const setBase = (key: keyof Product, value: unknown) => setForm((f) => ({ ...f, [key]: value }));
 
   const setArrayField = (key: 'images' | 'tags' | 'ingredients' | 'certifications', value: string) =>
@@ -86,7 +103,14 @@ export default function ProductForm({ product, categories, isEdit }: { product?:
   const setVariant = (idx: number, key: keyof ProductVariant, value: unknown) =>
     setForm((f) => ({
       ...f,
-      variants: f.variants.map((v, i) => (i === idx ? { ...v, [key]: value } : v)),
+      variants: f.variants.map((v, i) => {
+        if (i !== idx) return v;
+        const next = { ...v, [key]: value } as ProductVariant;
+        if ((key === 'quantity' || key === 'measurement') && f.sku) {
+          next.sku = generateVariantSKU(f.sku, next.quantity, next.measurement);
+        }
+        return next;
+      }),
     }));
 
   const addVariant = () =>
@@ -116,6 +140,15 @@ export default function ProductForm({ product, categories, isEdit }: { product?:
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    const skus = form.variants.map((v) => v.sku.trim()).filter(Boolean);
+    const duplicate = skus.find((s, i) => skus.indexOf(s) !== i);
+    if (duplicate) {
+      setError(`Duplicate variant SKU: ${duplicate}`);
+      setLoading(false);
+      return;
+    }
+
     try {
       const data = { ...form };
       if (isEdit && form._id) {

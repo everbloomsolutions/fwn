@@ -6,11 +6,13 @@ import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Heading, Text, Button } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/layout';
-import { Loader2, Search, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Loader2, Search, ChevronLeft, ChevronRight, AlertTriangle, Plus, Minus } from 'lucide-react';
 
 interface Variant {
   _id: string;
+  sku: string;
   unit: string;
+  price: number;
   stock: number;
   isActive: boolean;
 }
@@ -128,7 +130,7 @@ export default function AdminInventoryPage() {
     try {
       await apiRequest({
         method: 'PATCH',
-        url: `${API_ENDPOINTS.products.LIST}/${product._id}/inventory`,
+        url: API_ENDPOINTS.products.INVENTORY(product._id),
         data: {
           variants: product.variants.map((v) => ({
             variantId: v._id,
@@ -264,7 +266,9 @@ export default function AdminInventoryPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border text-left text-text-muted">
+                        <th className="pb-2 font-medium">SKU</th>
                         <th className="pb-2 font-medium">Unit</th>
+                        <th className="pb-2 font-medium">Price</th>
                         <th className="pb-2 font-medium">Stock</th>
                         <th className="pb-2 font-medium">Active</th>
                       </tr>
@@ -278,19 +282,47 @@ export default function AdminInventoryPage() {
                             backgroundColor: variant.stock < 10 && variant.isActive !== false ? 'rgba(245,158,11,0.05)' : undefined,
                           }}
                         >
+                          <td className="py-2 pr-4 font-medium text-text">{variant.sku || '-'}</td>
                           <td className="py-2 pr-4">{variant.unit}</td>
+                          <td className="py-2 pr-4">₹{variant.price}</td>
                           <td className="py-2 pr-4">
-                            <input
-                              type="number"
-                              min={0}
-                              value={variant.stock}
-                              onChange={(e) =>
-                                updateVariant(product._id, variant._id, {
-                                  stock: Number(e.target.value),
-                                })
-                              }
-                              className="w-24 rounded-lg border border-border bg-bg px-3 py-1 text-sm"
-                            />
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateVariant(product._id, variant._id, {
+                                    stock: Math.max(0, variant.stock - 10),
+                                  })
+                                }
+                                className="rounded-lg border border-border bg-surface p-1 hover:bg-surface-hover"
+                                aria-label="Decrease stock by 10"
+                              >
+                                <Minus className="h-3.5 w-3.5" />
+                              </button>
+                              <input
+                                type="number"
+                                min={0}
+                                value={variant.stock}
+                                onChange={(e) =>
+                                  updateVariant(product._id, variant._id, {
+                                    stock: Math.max(0, Number(e.target.value)),
+                                  })
+                                }
+                                className="w-20 rounded-lg border border-border bg-bg px-2 py-1 text-center text-sm"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateVariant(product._id, variant._id, {
+                                    stock: variant.stock + 10,
+                                  })
+                                }
+                                className="rounded-lg border border-border bg-surface p-1 hover:bg-surface-hover"
+                                aria-label="Increase stock by 10"
+                              >
+                                <Plus className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </td>
                           <td className="py-2">
                             <input
