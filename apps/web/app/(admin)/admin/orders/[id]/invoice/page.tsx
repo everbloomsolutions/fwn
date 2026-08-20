@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Container, Heading, Text } from '@/shared/ui';
+import { AdminBreadcrumbs } from '@/modules/admin/components/AdminBreadcrumbs';
 
 interface Order {
   orderNumber: string;
@@ -52,6 +53,14 @@ export default function AdminOrderInvoicePage() {
 
   return (
     <Container maxWidth="xl" className="py-8">
+      <AdminBreadcrumbs
+        items={[
+          { label: 'Orders', href: '/admin/orders' },
+          { label: order.orderNumber, href: `/admin/orders/${order.orderNumber}` },
+          { label: 'Invoice' },
+        ]}
+        className="mb-4"
+      />
       <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-white p-8 shadow-sm print:shadow-none print:border-none">
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>

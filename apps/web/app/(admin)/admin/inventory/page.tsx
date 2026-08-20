@@ -145,27 +145,27 @@ export default function AdminInventoryPage() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Heading level="h2" size="compact" balance>
-          Inventory Management
-        </Heading>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/admin/products/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-          >
-            Add Product
-          </Link>
-          <Link
-            href="/admin/categories"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-hover"
-          >
-            Categories
-          </Link>
+      <div className="sticky top-20 z-30 -mx-4 mb-6 border-b border-border bg-bg/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:py-4">
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <Heading level="h2" size="compact" balance>
+            Inventory Management
+          </Heading>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/admin/products/new"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+            >
+              Add Product
+            </Link>
+            <Link
+              href="/admin/categories"
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+            >
+              Categories
+            </Link>
+          </div>
         </div>
-      </div>
 
-      <div className="mb-6 rounded-2xl border border-border bg-surface p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />

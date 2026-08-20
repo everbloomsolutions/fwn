@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { Container } from '@/shared/ui';
 import { Navbar, Footer } from '@/shared/ui/layout';
-import { Loader2 } from 'lucide-react';
+import { AdminGuardSpinner } from '@/modules/admin/components/AdminShellSkeleton';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -17,16 +17,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [isAuthenticated, isLoading, router, user?.role]);
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated || user?.role !== 'admin') {
-    return null;
+  if (isLoading || !isAuthenticated || user?.role !== 'admin') {
+    return <AdminGuardSpinner />;
   }
 
   return (

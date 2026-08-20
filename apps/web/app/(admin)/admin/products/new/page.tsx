@@ -5,6 +5,7 @@ import ProductForm from '@/modules/admin/components/ProductForm';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Container, Heading } from '@/shared/ui';
+import { AdminBreadcrumbs } from '@/modules/admin/components/AdminBreadcrumbs';
 
 interface Category {
   _id: string;
@@ -27,6 +28,13 @@ export default function NewProductPage() {
 
   return (
     <Container maxWidth="xl" className="py-6 sm:py-10">
+      <AdminBreadcrumbs
+        items={[
+          { label: 'Inventory', href: '/admin/inventory' },
+          { label: 'New Product' },
+        ]}
+        className="mb-4"
+      />
       <Heading level="h1" className="mb-6">
         New Product
       </Heading>

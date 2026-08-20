@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Container, Heading, Text, Button } from '@/shared/ui';
+import { AdminBreadcrumbs } from '@/modules/admin/components/AdminBreadcrumbs';
 import { Loader2, ArrowLeft, Package, Truck, CreditCard, MapPin, User, Phone, Mail } from 'lucide-react';
 
 type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
@@ -113,6 +114,13 @@ export default function AdminOrderDetailPage() {
 
   return (
     <Container maxWidth="xl" className="py-6 sm:py-10">
+      <AdminBreadcrumbs
+        items={[
+          { label: 'Orders', href: '/admin/orders' },
+          { label: order.orderNumber },
+        ]}
+        className="mb-4"
+      />
       <Link
         href="/admin/orders"
         className="mb-4 inline-flex items-center gap-2 text-sm text-primary hover:text-primary-hover"

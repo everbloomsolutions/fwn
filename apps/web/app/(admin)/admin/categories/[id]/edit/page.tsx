@@ -6,6 +6,7 @@ import CategoryForm from '@/modules/admin/components/CategoryForm';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
 import { Container, Heading, Text } from '@/shared/ui';
+import { AdminBreadcrumbs } from '@/modules/admin/components/AdminBreadcrumbs';
 
 interface Category {
   _id: string;
@@ -41,6 +42,13 @@ export default function EditCategoryPage() {
 
   return (
     <Container maxWidth="xl" className="py-6 sm:py-10">
+      <AdminBreadcrumbs
+        items={[
+          { label: 'Categories', href: '/admin/categories' },
+          { label: 'Edit Category' },
+        ]}
+        className="mb-4"
+      />
       <Heading level="h1" className="mb-6">
         Edit {category.name}
       </Heading>
