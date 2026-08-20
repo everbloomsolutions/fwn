@@ -5,12 +5,12 @@
  */
 
 :root {
-  /* Color Palette */
-  --color-primary: #4abe1c;
-  --color-primary-hover: #40f040;
-  --color-primary-light: #dbeafe;
-  --color-accent: #8b5cf6;
-  --color-accent-hover: #7c3aed;
+  /* Color Palette - WCAG AA compliant on white/brand backgrounds */
+  --color-primary: #2f7a19;
+  --color-primary-hover: #256312;
+  --color-primary-light: #dcfce7;
+  --color-accent: #7c3aed;
+  --color-accent-hover: #6d28d9;
   --color-accent-light: #ede9fe;
 
   /* Text Colors */
@@ -27,9 +27,9 @@
   --color-border: #e7e5e4;
 
   /* Status Colors (WCAG AA Compliant - 4.5:1 contrast ratio) */
-  --color-status-success: #059669; /* Adjusted for better contrast */
+  --color-status-success: #047857; /* Adjusted for better contrast */
   --color-status-success-light: #d1fae5; /* Light variant for backgrounds */
-  --color-status-warning: #d97706; /* Adjusted for better contrast */
+  --color-status-warning: #b45309; /* Adjusted for better contrast */
   --color-status-warning-light: #fef3c7; /* Light variant for backgrounds */
   --color-status-error: #dc2626; /* Adjusted for better contrast */
   --color-status-error-light: #fee2e2; /* Light variant for backgrounds */
@@ -139,10 +139,10 @@
 
 [data-theme='dark'] {
   --color-primary: #60a5fa;
-  --color-primary-hover: #3b82f6;
+  --color-primary-hover: #93c5fd;
   --color-primary-light: #1e3a8a;
   --color-accent: #a78bfa;
-  --color-accent-hover: #8b5cf6;
+  --color-accent-hover: #c4b5fd;
   --color-accent-light: #4c1d95;
 
   --color-text: #f9fafb;

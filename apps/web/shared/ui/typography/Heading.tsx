@@ -48,7 +48,7 @@ const headingVariants = cva('font-bold leading-tight tracking-tight', {
     {
       level: 'h6',
       size: 'compact',
-      class: 'text-[11px] sm:text-xs sm:text-sm md:text-base',
+      class: 'text-xs sm:text-sm md:text-base',
     },
   ],
   defaultVariants: {

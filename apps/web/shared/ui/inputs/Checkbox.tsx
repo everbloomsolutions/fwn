@@ -44,9 +44,9 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               )}
             >
               {indeterminate ? (
-                <div className="h-0.5 w-3 bg-text-inverse" />
+                <div className="h-0.5 w-3 bg-white" />
               ) : (
-                <Check className="h-3 w-3 text-text-inverse opacity-0 transition-opacity peer-checked:opacity-100" />
+                <Check className="h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
               )}
             </label>
           </div>
