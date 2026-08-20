@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
-import { Heading, Text, Button } from '@/shared/ui';
+import { Text, Button, EmptyState } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/layout';
+import { SkeletonCard } from '@/shared/ui/feedback/Skeleton';
+import { DataTable } from '@/modules/admin/components/DataTable';
+import { DataCard } from '@/modules/admin/components/DataCard';
 import { Loader2, Search, Pencil, Trash2, Plus } from 'lucide-react';
 
 interface Product {
@@ -82,6 +85,27 @@ export default function AdminProductsPage() {
     }
   };
 
+  const actions = (product: Product) => (
+    <>
+      <Link
+        href={`/admin/products/${product._id}/edit`}
+        className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+      >
+        <Pencil className="h-4 w-4" /> Edit
+      </Link>
+      <Button
+        size="sm"
+        variant="secondary"
+        onClick={() => handleDelete(product)}
+        disabled={deleting === product._id}
+        className="inline-flex items-center gap-1"
+      >
+        <Trash2 className="h-4 w-4" />
+        {deleting === product._id ? 'Deleting...' : 'Delete'}
+      </Button>
+    </>
+  );
+
   return (
     <div>
       <PageHeader
@@ -110,77 +134,81 @@ export default function AdminProductsPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="space-y-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
         </div>
       ) : products.length === 0 ? (
-        <Text className="text-text-muted">No products found.</Text>
+        <EmptyState
+          title="No products found"
+          description="Try adjusting your search or add a new product to get started."
+          icon={<Search className="h-10 w-10 text-text-muted" />}
+          action={{
+            label: 'Add Product',
+            onClick: () => (window.location.href = '/admin/products/new'),
+          }}
+        />
       ) : (
-        <div className="space-y-4">
-          {products.map((product) => (
-            <div
-              key={product._id}
-              className="flex flex-col gap-4 rounded-2xl border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-2">
-                  <Heading level="h3" size="compact" className="text-base">
-                    {product.name}
-                  </Heading>
-                  {!product.isActive && (
-                    <span className="rounded-full bg-bg px-2 py-0.5 text-xs font-medium text-text-muted">Inactive</span>
-                  )}
+        <>
+          <DataTable
+            columns={[
+              { key: 'name', header: 'Product', cell: (p) => (
+                <div>
+                  <Text className="font-medium">{p.name}</Text>
+                  {!p.isActive && <span className="rounded-full bg-bg px-2 py-0.5 text-xs text-text-muted">Inactive</span>}
                 </div>
-                <Text className="text-sm text-text-muted">
-                  SKU: {product.sku} · {product.category?.name || 'No category'} · ₹{product.price} / {product.unit}
-                </Text>
-              </div>
+              ) },
+              { key: 'sku', header: 'SKU', cell: (p) => p.sku, className: 'w-32' },
+              { key: 'category', header: 'Category', cell: (p) => p.category?.name || '-', className: 'w-40' },
+              { key: 'price', header: 'Price', cell: (p) => `₹${p.price} / ${p.unit}`, className: 'w-28' },
+              { key: 'actions', header: '', cell: (p) => <div className="flex items-center gap-2 justify-end">{actions(p)}</div>, className: 'w-44' },
+            ]}
+            rows={products}
+            keyExtractor={(p) => p._id}
+          />
+          <DataCard
+            rows={products}
+            keyExtractor={(p) => p._id}
+            fields={[
+              { label: 'Product', value: (p) => (
+                <div>
+                  <span className="font-medium">{p.name}</span>
+                  {!p.isActive && <span className="ml-2 rounded-full bg-bg px-2 py-0.5 text-xs text-text-muted">Inactive</span>}
+                </div>
+              ) },
+              { label: 'SKU', value: (p) => p.sku },
+              { label: 'Category', value: (p) => p.category?.name || '-' },
+              { label: 'Price', value: (p) => `₹${p.price} / ${p.unit}` },
+            ]}
+            actions={actions}
+          />
+
+          {pagination && pagination.totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-between">
+              <Text className="text-sm text-text-muted">
+                {pagination.total} products · page {pagination.page} of {pagination.totalPages}
+              </Text>
               <div className="flex items-center gap-2">
-                <Link
-                  href={`/admin/products/${product._id}/edit`}
-                  className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-text hover:bg-surface-hover"
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-hover disabled:opacity-50"
                 >
-                  <Pencil className="h-4 w-4" /> Edit
-                </Link>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => handleDelete(product)}
-                  disabled={deleting === product._id}
-                  className="inline-flex items-center gap-1"
+                  Prev
+                </button>
+                <span className="text-sm text-text-muted">{page} / {pagination.totalPages}</span>
+                <button
+                  onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                  disabled={page === pagination.totalPages}
+                  className="rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-hover disabled:opacity-50"
                 >
-                  <Trash2 className="h-4 w-4" />
-                  {deleting === product._id ? 'Deleting...' : 'Delete'}
-                </Button>
+                  Next
+                </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
-
-      {pagination && pagination.totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between">
-          <Text className="text-sm text-text-muted">
-            {pagination.total} products · page {pagination.page} of {pagination.totalPages}
-          </Text>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-hover disabled:opacity-50"
-            >
-              Prev
-            </button>
-            <span className="text-sm text-text-muted">{page} / {pagination.totalPages}</span>
-            <button
-              onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-              disabled={page === pagination.totalPages}
-              className="rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-hover disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+          )}
+        </>
       )}
     </div>
   );

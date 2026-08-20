@@ -4,9 +4,12 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
-import { Heading, Text, Button } from '@/shared/ui';
+import { Text, EmptyState } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/layout';
-import { Loader2 } from 'lucide-react';
+import { SkeletonCard } from '@/shared/ui/feedback/Skeleton';
+import { DataTable } from '@/modules/admin/components/DataTable';
+import { DataCard } from '@/modules/admin/components/DataCard';
+import { Loader2, Plus } from 'lucide-react';
 
 interface Category {
   _id: string;
@@ -49,6 +52,26 @@ export default function AdminCategoriesPage() {
     }
   };
 
+  const actions = (category: Category) => (
+    <div className="flex items-center gap-3">
+      {!category.isActive && (
+        <span className="rounded-full bg-bg px-2 py-0.5 text-xs text-text-muted">Inactive</span>
+      )}
+      <Link
+        href={`/admin/categories/${category._id}/edit`}
+        className="text-sm font-medium text-primary hover:text-primary-hover"
+      >
+        Edit
+      </Link>
+      <button
+        onClick={() => deleteCategory(category._id)}
+        className="text-sm font-medium text-status-error hover:text-status-error/80"
+      >
+        Delete
+      </button>
+    </div>
+  );
+
   return (
     <div>
       <PageHeader
@@ -58,45 +81,49 @@ export default function AdminCategoriesPage() {
             href="/admin/categories/new"
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-hover"
           >
-            Add Category
+            <Plus className="h-4 w-4" /> Add Category
           </Link>
         }
       />
 
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="space-y-3">
+          <SkeletonCard />
+          <SkeletonCard />
         </div>
       ) : categories.length === 0 ? (
-        <Text className="text-text-muted">No categories found.</Text>
+        <EmptyState
+          title="No categories found"
+          description="Add a category to organize your products."
+          icon={<Plus className="h-10 w-10 text-text-muted" />}
+          action={{ label: 'Add Category', onClick: () => (window.location.href = '/admin/categories/new') }}
+        />
       ) : (
-        <div className="space-y-2">
-          {categories.map((c) => (
-            <div
-              key={c._id}
-              className="flex items-center justify-between rounded-2xl border border-border bg-surface p-4"
-            >
-              <div>
-                <Text className="font-medium">{c.name}</Text>
-                <Text className="text-sm text-text-muted">/{c.slug}</Text>
-              </div>
-              <div className="flex items-center gap-3">
-                {!c.isActive && (
-                  <span className="rounded-full bg-bg px-2 py-0.5 text-xs text-text-muted">Inactive</span>
-                )}
-                <Link href={`/admin/categories/${c._id}/edit`} className="text-sm text-primary hover:text-primary-hover">
-                  Edit
-                </Link>
-                <button
-                  onClick={() => deleteCategory(c._id)}
-                  className="text-sm text-status-error hover:text-status-error/80"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <>
+          <DataTable
+            columns={[
+              { key: 'name', header: 'Name', cell: (c) => (
+                <div>
+                  <Text className="font-medium">{c.name}</Text>
+                  {!c.isActive && <span className="rounded-full bg-bg px-2 py-0.5 text-xs text-text-muted">Inactive</span>}
+                </div>
+              ) },
+              { key: 'slug', header: 'Slug', cell: (c) => `/${c.slug}`, className: 'w-1/3' },
+              { key: 'actions', header: '', cell: (c) => <div className="text-right">{actions(c)}</div>, className: 'w-40' },
+            ]}
+            rows={categories}
+            keyExtractor={(c) => c._id}
+          />
+          <DataCard
+            rows={categories}
+            keyExtractor={(c) => c._id}
+            fields={[
+              { label: 'Name', value: (c) => c.name },
+              { label: 'Slug', value: (c) => `/${c.slug}` },
+            ]}
+            actions={actions}
+          />
+        </>
       )}
     </div>
   );
