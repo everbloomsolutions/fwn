@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
 
   const containerVariants = {
     hidden: { opacity: 0 },

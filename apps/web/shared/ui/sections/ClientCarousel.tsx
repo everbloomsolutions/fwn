@@ -13,7 +13,6 @@ export interface ClientCarouselProps extends Omit<HTMLAttributes<HTMLDivElement>
   onSelect: (index: number) => void;
   autoPlay?: boolean;
   autoPlayInterval?: number;
-  onImageClick: (clientIndex: number, imageIndex: number) => void;
 }
 
 export function ClientCarousel({
@@ -22,7 +21,6 @@ export function ClientCarousel({
   onSelect,
   autoPlay = true,
   autoPlayInterval = 5000,
-  onImageClick,
   className,
   ...props
 }: ClientCarouselProps) {
@@ -124,7 +122,6 @@ export function ClientCarousel({
         <ClientCard
           client={clients[selectedIndex]}
           isActive={true}
-          onImageClick={(imageIndex) => onImageClick(selectedIndex, imageIndex)}
           autoCycleInterval={4000}
         />
       </div>

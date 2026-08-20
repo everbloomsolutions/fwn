@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
@@ -97,7 +97,7 @@ export default function ShopPage() {
     return Array.from(units).sort();
   }, [products]);
 
-  const buildUrl = () => {
+  const buildUrl = useCallback(() => {
     const params = new URLSearchParams();
     if (page > 1) params.set('page', page.toString());
     if (search.trim()) params.set('search', search.trim());
@@ -107,9 +107,9 @@ export default function ShopPage() {
     if (bestSellerOnly) params.set('isBestSeller', 'true');
     if (selectedPacks.length) params.set('unit', selectedPacks.join(','));
     return `/shop?${params.toString()}`;
-  };
+  }, [page, search, selectedCategory, sortBy, inStockOnly, bestSellerOnly, selectedPacks]);
 
-  async function loadProducts() {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -136,23 +136,22 @@ export default function ShopPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [page, search, selectedCategory, sortBy, inStockOnly, bestSellerOnly, selectedPacks]);
 
   useEffect(() => {
     loadProducts();
-  }, [page, selectedCategory, sortBy, inStockOnly, bestSellerOnly, selectedPacks]);
+  }, [loadProducts]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(1);
-      loadProducts();
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
   useEffect(() => {
     router.replace(buildUrl(), { scroll: false });
-  }, [page, search, selectedCategory, sortBy, inStockOnly, bestSellerOnly, selectedPacks]);
+  }, [buildUrl, router]);
 
   const activeCategory = categories.find((c) => c.slug === selectedCategory);
 

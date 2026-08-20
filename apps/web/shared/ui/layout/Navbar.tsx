@@ -103,8 +103,6 @@ export function Navbar() {
     ? adminLinks.map((l) => ({ href: l.href, label: l.label }))
     : [...navbarNavigationLinks, ...mobileCategoryLinks];
 
-  const desktopNavLinks = isAdmin ? adminLinks : navbarNavigationLinks;
-
   return (
     <>
       <header className="border-b border-border bg-surface/95 backdrop-blur-md sticky top-0 z-40 shadow-sm">

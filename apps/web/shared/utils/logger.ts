@@ -44,7 +44,7 @@ class Logger {
       try {
         const errorObj = error instanceof Error ? error : new Error(String(error));
         window.Sentry.captureException(errorObj, context);
-      } catch (e) {
+      } catch {
         // Silently fail if error tracking fails
       }
     }
@@ -54,7 +54,7 @@ class Logger {
       try {
         const errorObj = error instanceof Error ? error : new Error(String(error));
         window.LogRocket.captureException(errorObj);
-      } catch (e) {
+      } catch {
         // Silently fail if error tracking fails
       }
     }
@@ -70,7 +70,7 @@ class Logger {
     try {
       const error = args[0] instanceof Error ? args[0] : new Error(message);
       this.sendToErrorTracking(error, { extra: args });
-    } catch (e) {
+    } catch {
       // Fallback if error creation fails
       this.sendToErrorTracking(new Error(message), { extra: args });
     }

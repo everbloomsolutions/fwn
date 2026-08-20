@@ -6,7 +6,7 @@
 'use client';
 
 import { HTMLAttributes } from 'react';
-import { Container, Section, SectionHeader, Card, CardContent, Text, Heading } from '@/shared/ui';
+import { Container, Section, SectionHeader, Card, CardContent, Text } from '@/shared/ui';
 import { staggerContainer } from '@/shared/core/theme/utils/motion';
 import { motion } from 'framer-motion';
 import { cn } from '@/shared/utils/cn';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
@@ -71,7 +71,7 @@ export default function AdminInventoryPage() {
     loadCategories();
   }, []);
 
-  async function loadProducts() {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -92,19 +92,18 @@ export default function AdminInventoryPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [search, category, lowStock, activeFilter, page]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(1);
-      loadProducts();
     }, 300);
     return () => clearTimeout(timer);
   }, [search, category, lowStock, activeFilter]);
 
   useEffect(() => {
     loadProducts();
-  }, [page]);
+  }, [loadProducts]);
 
   const isLowStock = (p: Product) =>
     p.variants.some((v) => v.isActive !== false && v.stock > 0 && v.stock < 10) ||

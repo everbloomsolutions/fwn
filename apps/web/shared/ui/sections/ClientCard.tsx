@@ -10,14 +10,12 @@ import Image from 'next/image';
 export interface ClientCardProps extends HTMLAttributes<HTMLDivElement> {
   client: Client;
   isActive: boolean;
-  onImageClick: (imageIndex: number) => void;
   autoCycleInterval?: number;
 }
 
 export function ClientCard({ 
   client, 
   isActive, 
-  onImageClick, 
   autoCycleInterval = 3000,
   className, 
   ...props 

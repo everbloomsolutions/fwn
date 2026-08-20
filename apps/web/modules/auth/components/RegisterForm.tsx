@@ -3,13 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
-import Link from 'next/link';
-import { Input, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui';
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui';
 import { useAuth } from '../hooks/useAuth';
 import { register as registerService } from '../services/authService';
 import { registerSchema } from '../schemas/authSchema';
 import { OAuthButtons } from './OAuthButtons';
-import { PUBLIC_ROUTES, AUTH_ROUTES, ONBOARDING_ROUTES } from '@/shared/config/routes';
+import { PUBLIC_ROUTES, ONBOARDING_ROUTES } from '@/shared/config/routes';
 import { motion } from 'framer-motion';
 import { UserPlus, Mail, Lock, User, ArrowRight } from 'lucide-react';
 

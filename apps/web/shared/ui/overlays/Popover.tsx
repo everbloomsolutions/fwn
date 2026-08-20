@@ -13,7 +13,6 @@ export interface PopoverProps {
   align?: 'start' | 'center' | 'end';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  closeOnClickOutside?: boolean;
   className?: string;
 }
 
@@ -24,7 +23,6 @@ export function Popover({
   align = 'center',
   open: controlledOpen,
   onOpenChange,
-  closeOnClickOutside = true,
   className,
 }: PopoverProps) {
   const [internalOpen, setInternalOpen] = useState(false);

@@ -7,8 +7,6 @@
 
 import { HTMLAttributes } from 'react';
 import { Container, Section, SectionHeader, Card, CardHeader, CardTitle, CardContent, CardFooter, Button, Text } from '@/shared/ui';
-import { MotionDiv } from '@/shared/ui/components/motion/MotionDiv';
-import { staggerContainer } from '@/shared/core/theme/utils/motion';
 import { motion } from 'framer-motion';
 import { cn } from '@/shared/utils/cn';
 import Link from 'next/link';
@@ -47,7 +45,7 @@ export function PricingSection({
       <Container maxWidth="xl">
         <SectionHeader title={title} description={description} />
         <motion.div
-          variants={staggerContainer}
+          variants={{}}
           initial="hidden"
           animate="visible"
         >

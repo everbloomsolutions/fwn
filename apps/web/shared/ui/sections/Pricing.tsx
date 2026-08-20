@@ -31,14 +31,12 @@ export interface PricingProps extends HTMLAttributes<HTMLElement> {
   title: string;
   description?: string;
   tiers: PricingTier[];
-  columns?: 1 | 2 | 3 | 4;
 }
 
 export function Pricing({
   title,
   description,
   tiers,
-  columns = 3,
   className,
   ...props
 }: PricingProps) {

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, Badge, Button } from '@/share
 import { Project, ProjectStatus } from '../types/project.types';
 import { Clock, CheckCircle, XCircle, AlertCircle, Wrench, FileCheck } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/shared/utils/cn';
+
 
 function formatTimeAgo(date: string | Date): string {
   const now = new Date();

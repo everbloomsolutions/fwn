@@ -21,7 +21,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     const inputId = id || generatedId;
     const errorId = `${inputId}-error`;
     const descriptionId = description ? `${inputId}-description` : undefined;
-    const [isOpen, setIsOpen] = useState(false);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange?.(e.target.value);

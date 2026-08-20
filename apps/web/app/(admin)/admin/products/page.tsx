@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
@@ -9,7 +9,7 @@ import { PageHeader } from '@/shared/ui/layout';
 import { SkeletonCard } from '@/shared/ui/feedback/Skeleton';
 import { DataTable } from '@/modules/admin/components/DataTable';
 import { DataCard } from '@/modules/admin/components/DataCard';
-import { Loader2, Search, Pencil, Trash2, Plus } from 'lucide-react';
+import { Search, Pencil, Trash2, Plus } from 'lucide-react';
 
 interface Product {
   _id: string;
@@ -40,7 +40,7 @@ export default function AdminProductsPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [pagination, setPagination] = useState<ProductResponse['pagination']>({ total: 0, page: 1, limit: 20, totalPages: 1 });
 
-  async function loadProducts() {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -58,19 +58,18 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [search, page]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(1);
-      loadProducts();
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
   useEffect(() => {
     loadProducts();
-  }, [page]);
+  }, [loadProducts]);
 
   const handleDelete = async (product: Product) => {
     if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return;

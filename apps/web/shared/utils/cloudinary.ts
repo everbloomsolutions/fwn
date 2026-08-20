@@ -44,7 +44,6 @@ export function buildCloudinaryUrl(
     transformations.push(transformation);
   } else {
     if (width || height) {
-      const size = [width, height].filter(Boolean).join('x');
       transformations.push(`w_${width || 'auto'},h_${height || 'auto'},c_${crop}`);
       if (gravity !== 'auto') {
         transformations.push(`g_${gravity}`);

@@ -2,7 +2,7 @@
 
 import { HTMLAttributes, useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/shared/ui/buttons/Button';
+
 import { cn } from '@/shared/utils/cn';
 import Image from 'next/image';
 

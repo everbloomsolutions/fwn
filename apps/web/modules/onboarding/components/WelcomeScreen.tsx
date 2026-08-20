@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Heading, Text } from '@/shared/ui';
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Text } from '@/shared/ui';
 import { PUBLIC_ROUTES } from '@/shared/config/routes';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { Sparkles, ArrowRight } from 'lucide-react';
@@ -44,13 +44,13 @@ export function WelcomeScreen({ onGetStarted, onSkip }: WelcomeScreenProps) {
             Welcome{userName !== 'there' ? `, ${userName}` : ''}!
           </CardTitle>
           <CardDescription className="text-base">
-            We're excited to have you on board
+            We&apos;re excited to have you on board
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4 text-center">
             <Text className="text-text-muted">
-              Let's get you set up in just a few quick steps. You'll be able to:
+              Let&apos;s get you set up in just a few quick steps. You&apos;ll be able to:
             </Text>
             <ul className="space-y-2 text-left">
               <li className="flex items-start gap-2">

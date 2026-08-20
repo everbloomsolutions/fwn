@@ -9,7 +9,7 @@ import { PageHeader } from '@/shared/ui/layout';
 import { SkeletonCard } from '@/shared/ui/feedback/Skeleton';
 import { DataTable } from '@/modules/admin/components/DataTable';
 import { DataCard } from '@/modules/admin/components/DataCard';
-import { Loader2, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface Category {
   _id: string;

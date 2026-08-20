@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { z } from 'zod';
-import { Input } from '@/shared/ui';
-import { Button } from '@/shared/ui';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui';
+import { Input, Button } from '@/shared/ui';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { changePassword } from '../services/userService';
 import { changePasswordSchema } from '../schemas/userSchema';

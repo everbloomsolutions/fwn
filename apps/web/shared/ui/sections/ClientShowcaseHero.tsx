@@ -4,7 +4,6 @@ import { HTMLAttributes, useState } from 'react';
 import { Client } from '@/shared/types/client.types';
 import dynamic from 'next/dynamic';
 import { ClientCarousel } from './ClientCarousel';
-import { ClientImageGallery } from './ClientImageGallery';
 import { Container, Heading, Text } from '@/shared/ui';
 import { cn } from '@/shared/utils/cn';
 import { DEFAULT_MAP_STYLE, type MapboxStyle } from '@/shared/config/mapbox';
@@ -27,31 +26,12 @@ export function ClientShowcaseHero({
   ...props
 }: ClientShowcaseHeroProps) {
   const [selectedClientIndex, setSelectedClientIndex] = useState(0);
-  const [expandedImageIndex, setExpandedImageIndex] = useState<number | null>(null);
-  const [expandedClientIndex, setExpandedClientIndex] = useState<number | null>(null);
-
   const selectedClient = clients[selectedClientIndex];
 
   const handleClientSelect = (clientId: string) => {
     const index = clients.findIndex((c) => c.id === clientId);
     if (index !== -1) {
       setSelectedClientIndex(index);
-    }
-  };
-
-  const handleImageClick = (clientIndex: number, imageIndex: number) => {
-    setExpandedClientIndex(clientIndex);
-    setExpandedImageIndex(imageIndex);
-  };
-
-  const handleCloseGallery = () => {
-    setExpandedImageIndex(null);
-    setExpandedClientIndex(null);
-  };
-
-  const handleImageExpand = (imageIndex: number) => {
-    if (expandedClientIndex !== null) {
-      setExpandedImageIndex(imageIndex);
     }
   };
 
@@ -107,26 +87,10 @@ export function ClientShowcaseHero({
               onSelect={setSelectedClientIndex}
               autoPlay={autoPlay}
               autoPlayInterval={autoPlayInterval}
-              onImageClick={handleImageClick}
             />
           </div>
         </div>
-
-        {/* Inline Image Gallery - Full Width */}
-        {expandedClientIndex !== null && expandedImageIndex !== null && (
-          <div className="mt-8 w-full px-4 sm:px-6 lg:px-8">
-            <ClientImageGallery
-              images={clients[expandedClientIndex].images}
-              isExpanded={true}
-              expandedIndex={expandedImageIndex}
-              onExpand={handleImageExpand}
-              onClose={handleCloseGallery}
-              clientName={clients[expandedClientIndex].name}
-            />
-          </div>
-        )}
       </div>
     </section>
   );
 }
-

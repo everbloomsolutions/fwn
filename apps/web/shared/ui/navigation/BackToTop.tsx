@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowUp } from 'lucide-react';
 import { Button } from '@/shared/ui/buttons/Button';
-import { cn } from '@/shared/utils/cn';
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function BackToTop() {

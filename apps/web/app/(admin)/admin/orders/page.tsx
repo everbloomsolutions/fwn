@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
-import { Heading, Text } from '@/shared/ui';
+import { Text } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/layout';
 import { Loader2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -53,7 +53,7 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<OrdersResponse['pagination']>({ total: 0, page: 1, limit: 20, totalPages: 1 });
 
-  async function loadOrders() {
+  const loadOrders = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -73,19 +73,18 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [search, status, paymentStatus, page]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(1);
-      loadOrders();
     }, 300);
     return () => clearTimeout(timer);
   }, [search, status, paymentStatus]);
 
   useEffect(() => {
     loadOrders();
-  }, [page]);
+  }, [loadOrders]);
 
   const updateOrder = async (id: string, data: { status?: OrderStatus; paymentStatus?: PaymentStatus }) => {
     setUpdating((prev) => ({ ...prev, [id]: true }));

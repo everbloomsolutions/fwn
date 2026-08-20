@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import { useState, useRef, KeyboardEvent } from 'react';
 import { ChevronDown, Check, X } from 'lucide-react';
 import { Input } from '@/shared/ui';
 import { cn } from '@/shared/utils/cn';
