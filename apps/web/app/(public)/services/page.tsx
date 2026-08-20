@@ -9,42 +9,42 @@ import { motion } from 'framer-motion';
 
 const categories = [
   {
-    icon: Droplets,
+    icon: <Droplets className="h-6 w-6 text-white" />,
     title: 'Cold-Pressed Oils',
     description:
       'Pure, wood-pressed and cold-pressed oils including groundnut, sesame, mustard, and coconut — extracted without heat or chemicals.',
     image: 'https://images.unsplash.com/photo-1474979266404-7caddbed54e6?w=800&h=600&fit=crop',
   },
   {
-    icon: Sun,
+    icon: <Sun className="h-6 w-6 text-white" />,
     title: 'Organic Honey',
     description:
       'Raw, unprocessed honey collected from trusted apiaries and forest sources across India.',
     image: 'https://images.unsplash.com/photo-1587049352846-4a222e112d90?w=800&h=600&fit=crop',
   },
   {
-    icon: Wind,
+    icon: <Wind className="h-6 w-6 text-white" />,
     title: 'Whole Spices',
     description:
       'Aromatic, sun-dried whole spices and spice blends that bring authentic Indian flavors to your kitchen.',
     image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&h=600&fit=crop',
   },
   {
-    icon: ShoppingBasket,
+    icon: <ShoppingBasket className="h-6 w-6 text-white" />,
     title: 'Farm-Fresh Grains & Pulses',
     description:
       'Naturally grown rice, millets, pulses, and lentils sourced directly from farmer cooperatives.',
     image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&h=600&fit=crop',
   },
   {
-    icon: Leaf,
+    icon: <Leaf className="h-6 w-6 text-white" />,
     title: 'Natural Sweeteners',
     description:
       'Jaggery, palm sugar, and other unrefined sweeteners made using traditional methods.',
     image: 'https://images.unsplash.com/photo-1622484212850-eb936d1f3644?w=800&h=600&fit=crop',
   },
   {
-    icon: Award,
+    icon: <Award className="h-6 w-6 text-white" />,
     title: 'Wellness & Superfoods',
     description:
       'Dry fruits, seeds, herbal powders, and superfoods to support a balanced lifestyle.',
@@ -54,25 +54,25 @@ const categories = [
 
 const whyChooseUs = [
   {
-    icon: Award,
+    icon: <Award className="h-6 w-6 text-status-success" />,
     title: 'Certified Quality',
     description: 'Every product goes through quality checks and comes from verified sources.',
     iconColor: 'text-status-success',
   },
   {
-    icon: Leaf,
+    icon: <Leaf className="h-6 w-6 text-primary" />,
     title: 'No Additives',
     description: 'We avoid preservatives, artificial colors, and synthetic flavoring.',
     iconColor: 'text-primary',
   },
   {
-    icon: Truck,
+    icon: <Truck className="h-6 w-6 text-accent" />,
     title: 'Pan-India Delivery',
     description: 'Carefully packed and delivered to your doorstep across India.',
     iconColor: 'text-accent',
   },
   {
-    icon: Sun,
+    icon: <Sun className="h-6 w-6 text-primary" />,
     title: 'Ethical Sourcing',
     description: 'We partner with farmers and producers who follow fair and sustainable practices.',
     iconColor: 'text-primary',
@@ -128,7 +128,7 @@ export default function ProductsPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
                     <div className="absolute top-4 right-4 flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm text-white">
-                      <category.icon className="h-6 w-6 text-white" />
+                      {category.icon}
                     </div>
                   </div>
                   <CardHeader className="pb-2">

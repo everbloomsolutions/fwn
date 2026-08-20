@@ -6,16 +6,15 @@
 
 'use client';
 
-import { HTMLAttributes } from 'react';
+import { HTMLAttributes, ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Text } from '@/shared/ui';
 import { MotionDiv } from '@/shared/ui/components/motion/MotionDiv';
 import { cn } from '@/shared/utils/cn';
-import type { LucideIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export interface FeatureProps extends HTMLAttributes<HTMLDivElement> {
-  icon?: LucideIcon;
+  icon?: ReactNode;
   image?: string; // Image support
   imageAlt?: string;
   title: string;
@@ -40,7 +39,7 @@ const iconVariantClasses = {
 };
 
 export function Feature({
-  icon: Icon,
+  icon,
   image,
   imageAlt,
   title,
@@ -75,12 +74,12 @@ export function Feature({
           </div>
         )}
         <CardHeader>
-          {(Icon || !image) && (
+          {(icon || !image) && (
             <div className={cn(
               'mb-4 flex h-12 w-12 items-center justify-center rounded-lg transition-colors',
-              iconVariant === 'solid' && iconColor 
-                ? (iconColor === 'text-status-success' 
-                    ? 'bg-status-success/10' 
+              iconVariant === 'solid' && iconColor
+                ? (iconColor === 'text-status-success'
+                    ? 'bg-status-success/10'
                     : iconColor === 'text-primary'
                       ? 'bg-primary/10'
                       : iconColor === 'text-accent'
@@ -88,18 +87,7 @@ export function Feature({
                         : 'bg-primary/10')
                 : iconVariantClasses[iconVariant]
             )}>
-              {Icon && (
-                <Icon className={cn(
-                  'h-6 w-6 transition-colors',
-                  iconVariant === 'solid' && iconColor 
-                    ? iconColor // Apply iconColor directly to icon - CSS variables handle dark/light mode automatically
-                    : iconVariant === 'outline' 
-                      ? 'text-primary' 
-                      : iconVariant === 'gradient'
-                        ? 'text-white'
-                        : 'text-white'
-                )} />
-              )}
+              {icon && <span className="flex items-center justify-center">{icon}</span>}
             </div>
           )}
           <CardTitle>{title}</CardTitle>

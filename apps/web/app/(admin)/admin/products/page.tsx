@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { apiRequest } from '@/shared/core/http/apiClient';
 import { API_ENDPOINTS } from '@/shared/config/api';
@@ -9,6 +9,8 @@ import { PageHeader } from '@/shared/ui/layout';
 import { SkeletonCard } from '@/shared/ui/feedback/Skeleton';
 import { DataTable } from '@/modules/admin/components/DataTable';
 import { DataCard } from '@/modules/admin/components/DataCard';
+import { useApi } from '@/shared/hooks';
+import { useDebounce } from '@/shared/hooks';
 import { Search, Pencil, Trash2, Plus } from 'lucide-react';
 
 interface Product {
@@ -32,51 +34,36 @@ interface ProductResponse {
   };
 }
 
+function buildProductsUrl(page: number, search: string): string {
+  const params = new URLSearchParams();
+  params.set('page', page.toString());
+  params.set('limit', '20');
+  if (search.trim()) params.set('search', search.trim());
+  return `${API_ENDPOINTS.products.LIST}?${params.toString()}`;
+}
+
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<ProductResponse['pagination']>({ total: 0, page: 1, limit: 20, totalPages: 1 });
-
-  const loadProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      params.set('page', page.toString());
-      params.set('limit', '20');
-      if (search.trim()) params.set('search', search.trim());
-      const res = await apiRequest<ProductResponse>({
-        method: 'GET',
-        url: `${API_ENDPOINTS.products.LIST}?${params.toString()}`,
-      });
-      setProducts(res.data || []);
-      setPagination(res.pagination || { total: 0, page: 1, limit: 20, totalPages: 1 });
-    } catch {
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, page]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
+    setPage(1);
   }, [search]);
 
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
+  const debouncedSearch = useDebounce(search, 300);
+  const productsUrl = buildProductsUrl(page, debouncedSearch);
+
+  const { data, isLoading, mutate } = useApi<ProductResponse>(productsUrl);
+  const products = data?.data || [];
+  const pagination = data?.pagination || { total: 0, page: 1, limit: 20, totalPages: 1 };
 
   const handleDelete = async (product: Product) => {
     if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
     setDeleting(product._id);
     try {
       await apiRequest({ method: 'DELETE', url: API_ENDPOINTS.products.DELETE(product._id) });
-      await loadProducts();
+      await mutate();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete product');
     } finally {
@@ -132,7 +119,7 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-3">
           <SkeletonCard />
           <SkeletonCard />

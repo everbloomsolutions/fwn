@@ -32,7 +32,7 @@ async function getBestSellers(limit: number): Promise<Product[]> {
   try {
     const res = await fetch(
       `${getEnv().NEXT_PUBLIC_API_URL}${API_ENDPOINTS.products.LIST}?isBestSeller=true&sort=best_selling&limit=${limit}`,
-      { cache: 'no-store' }
+      { next: { revalidate: 60 } }
     );
     if (!res.ok) return [];
     const json = await res.json();

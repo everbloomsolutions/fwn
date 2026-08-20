@@ -1,5 +1,3 @@
-'use client';
-
 import {
   HeroSection,
   FeatureSection,
@@ -73,21 +71,21 @@ export default function HomeClient({ children }: HomeClientProps) {
         description="We bring you carefully curated food products that are good for you and the planet."
         features={[
           {
-            icon: Leaf,
+            icon: <Leaf className="h-6 w-6" />,
             title: '100% Natural',
             description:
               'Our products are free from artificial preservatives, colors, and flavors, keeping your meals pure and healthy.',
             iconColor: 'text-status-success',
           },
           {
-            icon: ShieldCheck,
+            icon: <ShieldCheck className="h-6 w-6" />,
             title: 'Quality Certified',
             description:
               'Every product is sourced from certified farms and producers that follow strict quality and hygiene standards.',
             iconColor: 'text-primary',
           },
           {
-            icon: Heart,
+            icon: <Heart className="h-6 w-6" />,
             title: 'Farm to Family',
             description:
               'We work directly with farmers to bring fresh, wholesome food from the source to your doorstep.',

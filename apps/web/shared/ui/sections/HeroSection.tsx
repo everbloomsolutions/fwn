@@ -7,7 +7,7 @@
 
 'use client';
 
-import { HTMLAttributes, useEffect, useRef, useState } from 'react';
+import { HTMLAttributes, useEffect, useRef, useState, ReactNode } from 'react';
 import { Container, Button, Heading, Text, Badge } from '@/shared/ui';
 import { MotionDiv } from '@/shared/ui/components/motion/MotionDiv';
 import { cn } from '@/shared/utils/cn';
@@ -23,7 +23,7 @@ export interface HeroImage {
 export interface HeroBadge {
   label: string;
   variant?: 'primary' | 'accent' | 'success' | 'warning' | 'info';
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: ReactNode;
 }
 
 export interface HeroAction {
@@ -314,10 +314,9 @@ export function HeroSection({
               align === 'left' && 'justify-start'
             )}>
               {badges.map((badge, index) => {
-                const BadgeIcon = badge.icon;
                 // Map HeroBadge variants to Badge component variants
-                const badgeVariant = badge.variant === 'primary' || badge.variant === 'accent' 
-                  ? 'default' 
+                const badgeVariant = badge.variant === 'primary' || badge.variant === 'accent'
+                  ? 'default'
                   : badge.variant || 'default';
                 return (
                   <Badge
@@ -330,7 +329,7 @@ export function HeroSection({
                         : ''
                     )}
                   >
-                    {BadgeIcon && <BadgeIcon className="h-3 w-3 mr-1 flex-shrink-0" />}
+                    {badge.icon && <span className="mr-1 flex-shrink-0">{badge.icon}</span>}
                     <span>{badge.label}</span>
                   </Badge>
                 );

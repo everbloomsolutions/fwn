@@ -24,7 +24,7 @@ const categoryImages: Record<string, string> = {
 async function getCategories(): Promise<Category[]> {
   try {
     const res = await fetch(`${getEnv().NEXT_PUBLIC_API_URL}${API_ENDPOINTS.categories.LIST}`, {
-      cache: 'no-store',
+      next: { revalidate: 60 },
     });
     if (!res.ok) return [];
     const json = await res.json();
